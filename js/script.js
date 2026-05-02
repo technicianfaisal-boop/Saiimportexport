@@ -50,7 +50,23 @@ renderProducts();
 
 // ==================== NAVBAR SCROLL ====================
 const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
+let lastScrollY = window.scrollY;
+
+window.addEventListener('scroll', () => {
+  const currentScrollY = window.scrollY;
+  
+  // Background toggle
+  navbar.classList.toggle('scrolled', currentScrollY > 60);
+  
+  // Hide on scroll down, show on scroll up
+  if (currentScrollY > lastScrollY && currentScrollY > 100) {
+    navbar.classList.add('hidden');
+  } else {
+    navbar.classList.remove('hidden');
+  }
+  
+  lastScrollY = currentScrollY;
+});
 
 // ==================== HAMBURGER ====================
 const hamburger = document.getElementById('hamburger');
