@@ -204,6 +204,24 @@
                         <input type="text" id="hero_cta_link" placeholder="e.g. #products">
                         <button class="btn-cta btn-full" style="margin-top:12px" onclick="saveHeroSettings()">💾 Save Hero Settings</button>
                     </div>
+                    <div class="setting-card">
+                        <h3>🖼️ Hero Background Image</h3>
+                        <label>Image URL (or upload below)</label>
+                        <input type="text" id="hero_bg_img" placeholder="images/hero_bg.webp">
+                        <div id="hero-img-upload" style="margin-top:8px;border:2px dashed #4a7c59;border-radius:10px;padding:15px;text-align:center;cursor:pointer;background:#f0f7f2;" onclick="document.getElementById('hero-img-input').click()">
+                            <div id="hero-img-prompt">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                <p style="color:#4a7c59;font-weight:600;font-size:0.78rem;margin:4px 0 0">Click to upload hero image</p>
+                                <p style="color:#888;font-size:0.7rem">Auto-compressed to WebP • 1200px max</p>
+                            </div>
+                            <div id="hero-img-preview" style="display:none">
+                                <img id="hero-preview-img" style="max-width:200px;max-height:120px;border-radius:8px">
+                                <p id="hero-img-info" style="color:#4a7c59;font-size:0.75rem;font-weight:600;margin:4px 0"></p>
+                            </div>
+                        </div>
+                        <input type="file" id="hero-img-input" accept="image/*" style="display:none">
+                        <button class="btn-cta btn-full" style="margin-top:10px" onclick="saveHeroImage()">💾 Save Hero Image</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -258,7 +276,22 @@
                 <input type="hidden" id="blog-edit-id">
                 <div class="form-group"><label>Title</label><input type="text" id="blog_title" class="form-control" required></div>
                 <div class="form-group"><label>Slug (URL-friendly)</label><input type="text" id="blog_slug" class="form-control" required placeholder="e.g. why-indian-basmati"></div>
-                <div class="form-group"><label>Cover Image URL</label><input type="text" id="blog_cover" class="form-control" placeholder="https://..."></div>
+                <div class="form-group">
+                    <label>Cover Image</label>
+                    <input type="text" id="blog_cover" class="form-control" placeholder="Auto-filled on upload or enter URL">
+                    <div id="blog-img-upload" style="margin-top:6px;border:2px dashed #4a7c59;border-radius:8px;padding:12px;text-align:center;cursor:pointer;background:#f0f7f2;" onclick="document.getElementById('blog-img-input').click()">
+                        <div id="blog-img-prompt">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            <p style="color:#4a7c59;font-weight:600;font-size:0.75rem;margin:3px 0 0">Upload cover image</p>
+                        </div>
+                        <div id="blog-img-preview" style="display:none">
+                            <img id="blog-preview-img" style="max-width:150px;max-height:80px;border-radius:6px">
+                            <p id="blog-img-info" style="color:#4a7c59;font-size:0.72rem;font-weight:600;margin:3px 0"></p>
+                            <button type="button" onclick="event.stopPropagation();clearBlogImage()" style="background:#e74c3c;color:#fff;border:none;padding:2px 8px;border-radius:4px;font-size:0.68rem;cursor:pointer">✕</button>
+                        </div>
+                    </div>
+                    <input type="file" id="blog-img-input" accept="image/*" style="display:none">
+                </div>
                 <div class="form-group"><label>Excerpt</label><textarea id="blog_excerpt" class="form-control" rows="2" placeholder="Short summary for listing page"></textarea></div>
                 <div class="form-group"><label>Content (HTML)</label><textarea id="blog_content" class="form-control" rows="6" required placeholder="Full blog post content..."></textarea></div>
                 <div class="form-group">

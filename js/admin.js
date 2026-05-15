@@ -237,27 +237,6 @@ function editBlog(id) {
     openBlogModal(true);
 }
 
-blogForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var btn = document.getElementById('blog-save-btn');
-    btn.innerText = 'Saving...';
-    var editId = document.getElementById('blog-edit-id').value;
-    var data = {
-        title: document.getElementById('blog_title').value,
-        slug: document.getElementById('blog_slug').value,
-        cover_img: document.getElementById('blog_cover').value || null,
-        excerpt: document.getElementById('blog_excerpt').value || null,
-        content: document.getElementById('blog_content').value,
-        published: document.getElementById('blog_published').checked,
-        updated_at: new Date().toISOString()
-    };
-    var r;
-    if (editId) { r = await saiDB.from('blog_posts').update(data).eq('id', parseInt(editId)); }
-    else { r = await saiDB.from('blog_posts').insert(data); }
-    btn.innerText = 'Save Post';
-    if (r.error) alert('Error: ' + r.error.message); else { closeBlogModal(); loadBlogPosts(); }
-});
-
 async function deleteBlog(id) {
     if (!confirm('Delete this post?')) return;
     await saiDB.from('blog_posts').delete().eq('id', id);
@@ -281,6 +260,7 @@ async function loadHeroSettings() {
         document.getElementById('hero_subheading').value = v.subheading || '';
         document.getElementById('hero_cta_text').value = v.cta_text || '';
         document.getElementById('hero_cta_link').value = v.cta_link || '';
+        document.getElementById('hero_bg_img').value = v.bg_image || 'images/hero_bg.webp';
     }
 }
 
@@ -290,11 +270,101 @@ async function saveHeroSettings() {
         heading: document.getElementById('hero_heading').value,
         subheading: document.getElementById('hero_subheading').value,
         cta_text: document.getElementById('hero_cta_text').value,
-        cta_link: document.getElementById('hero_cta_link').value
+        cta_link: document.getElementById('hero_cta_link').value,
+        bg_image: document.getElementById('hero_bg_img').value
     };
     var r = await saiDB.from('site_settings').upsert({ key: 'hero', value: data, updated_at: new Date().toISOString() });
     if (r.error) alert('Error: ' + r.error.message); else alert('✅ Hero settings saved!');
 }
+
+// Hero image upload
+var pendingHeroImage = null;
+document.getElementById('hero-img-input').addEventListener('change', async function(e) {
+    if (!e.target.files.length) return;
+    var file = e.target.files[0];
+    var orig = (file.size/1024).toFixed(1);
+    document.getElementById('hero-img-prompt').style.display = 'none';
+    document.getElementById('hero-img-preview').style.display = 'block';
+    document.getElementById('hero-img-info').innerText = 'Compressing...';
+    var comp = await compressImage(file, 1200, 0.65);
+    pendingHeroImage = comp;
+    document.getElementById('hero-preview-img').src = URL.createObjectURL(comp);
+    document.getElementById('hero-img-info').innerText = orig + 'KB → ' + (comp.size/1024).toFixed(1) + 'KB ✓ WebP';
+});
+
+async function saveHeroImage() {
+    if (!pendingHeroImage) {
+        if (document.getElementById('hero_bg_img').value) { saveHeroSettings(); return; }
+        alert('Upload an image first'); return;
+    }
+    var path = 'hero/hero_bg.webp';
+    var r = await saiDB.storage.from('product-images').upload(path, pendingHeroImage, { contentType: 'image/webp', upsert: true });
+    if (r.error) { alert('Upload failed: ' + r.error.message); return; }
+    var url = saiDB.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+    document.getElementById('hero_bg_img').value = url;
+    pendingHeroImage = null;
+    saveHeroSettings();
+}
+
+// ==================== BLOG IMAGE UPLOAD ====================
+var pendingBlogImage = null;
+document.getElementById('blog-img-input').addEventListener('change', async function(e) {
+    if (!e.target.files.length) return;
+    var file = e.target.files[0];
+    var orig = (file.size/1024).toFixed(1);
+    document.getElementById('blog-img-prompt').style.display = 'none';
+    document.getElementById('blog-img-preview').style.display = 'block';
+    document.getElementById('blog-img-info').innerText = 'Compressing...';
+    var comp = await compressImage(file, 600, 0.6);
+    pendingBlogImage = comp;
+    document.getElementById('blog-preview-img').src = URL.createObjectURL(comp);
+    document.getElementById('blog-img-info').innerText = orig + 'KB → ' + (comp.size/1024).toFixed(1) + 'KB ✓ WebP';
+});
+
+function clearBlogImage() {
+    pendingBlogImage = null;
+    document.getElementById('blog-img-prompt').style.display = 'block';
+    document.getElementById('blog-img-preview').style.display = 'none';
+    document.getElementById('blog-img-input').value = '';
+}
+
+async function uploadBlogImage(slug) {
+    if (!pendingBlogImage) return null;
+    var path = 'blog/' + slug + '.webp';
+    var r = await saiDB.storage.from('product-images').upload(path, pendingBlogImage, { contentType: 'image/webp', upsert: true });
+    if (r.error) { alert('Blog image upload failed: ' + r.error.message); return null; }
+    return saiDB.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+}
+
+// Override blog form submit to include image upload
+blogForm.removeEventListener('submit', blogForm._blogHandler);
+blogForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('blog-save-btn');
+    btn.innerText = 'Saving...';
+    
+    if (pendingBlogImage) {
+        btn.innerText = 'Uploading image...';
+        var imgUrl = await uploadBlogImage(document.getElementById('blog_slug').value);
+        if (imgUrl) document.getElementById('blog_cover').value = imgUrl;
+    }
+    
+    var editId = document.getElementById('blog-edit-id').value;
+    var data = {
+        title: document.getElementById('blog_title').value,
+        slug: document.getElementById('blog_slug').value,
+        cover_img: document.getElementById('blog_cover').value || null,
+        excerpt: document.getElementById('blog_excerpt').value || null,
+        content: document.getElementById('blog_content').value,
+        published: document.getElementById('blog_published').checked,
+        updated_at: new Date().toISOString()
+    };
+    var r;
+    if (editId) { r = await saiDB.from('blog_posts').update(data).eq('id', parseInt(editId)); }
+    else { r = await saiDB.from('blog_posts').insert(data); }
+    btn.innerText = 'Save Post';
+    if (r.error) alert('Error: ' + r.error.message); else { pendingBlogImage = null; clearBlogImage(); closeBlogModal(); loadBlogPosts(); }
+});
 
 // ==================== PDF CATALOG GENERATOR ====================
 async function generatePDF() {
