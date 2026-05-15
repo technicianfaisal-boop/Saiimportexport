@@ -105,7 +105,7 @@
   // Update WhatsApp link with product name
   const waLink = document.querySelector('.btn-whatsapp');
   if (waLink) {
-    waLink.href = `https://wa.me/918595827184?text=Hello%20FARMEXO,%20I%20am%20interested%20in%20your%20${encodeURIComponent(p.name)}.%20Please%20share%20pricing%20and%20details.`;
+    waLink.href = `https://wa.me/918595827184?text=Hello%20SAI%20IMPORT%20EXPORT%20AGRO,%20I%20am%20interested%20in%20your%20${encodeURIComponent(p.name)}.%20Please%20share%20pricing%20and%20details.`;
   }
 
   // Key Specs Grid
@@ -177,7 +177,7 @@
   const qfProduct = document.getElementById('qf-product');
   const qfSubject = document.getElementById('qf-subject');
   if (qfProduct) qfProduct.value = p.name;
-  if (qfSubject) qfSubject.value = `🌾 Quote Request: ${p.name} — FARMEXO`;
+  if (qfSubject) qfSubject.value = `🌾 Quote Request: ${p.name} — SAI IMPORT EXPORT AGRO`;
 
   // Handle submit with AJAX (FormSubmit.co in background)
   if (quoteForm) {
