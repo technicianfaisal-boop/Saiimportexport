@@ -5,7 +5,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Use a unique variable name (saiDB) to avoid shadowing window.supabase library
 // window.supabase = the Supabase library (set by CDN)
 // saiDB = our initialized Supabase client instance
-const saiDB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+var saiDB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Helper function to check if user is logged in
 async function checkAuth() {
