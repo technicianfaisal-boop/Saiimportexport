@@ -72,6 +72,14 @@ async function renderProducts() {
       </div>`;
     productContainer.appendChild(card);
   });
+
+  // Re-observe dynamically created product cards for scroll animations
+  // The global IntersectionObserver runs before these cards exist
+  setTimeout(() => {
+    document.querySelectorAll('#product-container .animate-in').forEach(el => {
+      el.classList.add('visible'); // Make them visible immediately since they're already in view
+    });
+  }, 100);
 }
 
 renderProducts();
