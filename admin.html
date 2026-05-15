@@ -10,8 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase CDN is loaded before admin scripts at bottom of body -->
     
     <style>
         body { background: #f4f6f4; }
@@ -159,7 +158,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/supabase-client.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js?v=3"></script>
+    <script src="js/admin.js?v=3"></script>
 </body>
 </html>
