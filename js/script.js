@@ -398,15 +398,41 @@ async function getGeminiReply(userMsg) {
 let leadState = -1;
 let leadData = { name: '', email: '', products: [], requirements: '' };
 
-const CHAT_PRODUCTS = ['1121 Basmati', '1509 Basmati', 'Sona Masoori', 'Swarna Raw', 'IR 64 Parboiled', 'Other Rice'];
+const CHAT_PRODUCTS_MAIN = ['1121 Basmati', '1509 Basmati', 'Sona Masoori', 'Swarna Raw', 'IR 64 Parboiled'];
 
 function showProductCheckboxes() {
   const wrapper = document.createElement('div');
   wrapper.className = 'chat-message bot';
+  
+  let allProductNames = [];
+  if (typeof PRODUCT_DETAILS !== 'undefined') {
+    allProductNames = Object.values(PRODUCT_DETAILS).map(p => p.name);
+  } else {
+    allProductNames = CHAT_PRODUCTS_MAIN;
+  }
+
+  const mainNamesLower = CHAT_PRODUCTS_MAIN.map(n => n.toLowerCase());
+  const moreProducts = allProductNames.filter(name => {
+    return !mainNamesLower.some(main => name.toLowerCase().includes(main) || main.includes(name.toLowerCase()));
+  });
+
   wrapper.innerHTML = `
     <p>Please select the products you're interested in:</p>
-    <div class="chat-product-grid">
-      ${CHAT_PRODUCTS.map(p => `
+    <div class="chat-product-grid" id="main-product-grid" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+      ${CHAT_PRODUCTS_MAIN.map(p => `
+        <label class="chat-checkbox-label">
+          <input type="checkbox" value="${p}" class="chat-product-cb"> ${p}
+        </label>
+      `).join('')}
+      ${moreProducts.length > 0 ? `
+        <label class="chat-checkbox-label" id="chat-more-btn" style="color:var(--green); font-weight:600; cursor:pointer;">
+          + More...
+        </label>
+      ` : ''}
+    </div>
+    
+    <div class="chat-product-grid" id="more-product-grid" style="display:none; flex-direction:column; gap:8px; margin-bottom:10px; padding-top:10px; border-top:1px solid #eee;">
+      ${moreProducts.map(p => `
         <label class="chat-checkbox-label">
           <input type="checkbox" value="${p}" class="chat-product-cb"> ${p}
         </label>
@@ -416,6 +442,16 @@ function showProductCheckboxes() {
   `;
   chatBody.appendChild(wrapper);
   chatBody.scrollTop = chatBody.scrollHeight;
+
+  const moreBtn = wrapper.querySelector('#chat-more-btn');
+  const moreGrid = wrapper.querySelector('#more-product-grid');
+  if (moreBtn && moreGrid) {
+    moreBtn.addEventListener('click', () => {
+      moreBtn.style.display = 'none';
+      moreGrid.style.display = 'flex';
+      chatBody.scrollTop = chatBody.scrollHeight;
+    });
+  }
 
   // Hide text input during checkbox step
   chatField.style.display = 'none';
