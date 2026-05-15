@@ -56,9 +56,9 @@
   // Price
   if (p.specs && p.specs.price) {
     document.getElementById('pdp-price').textContent = p.specs.price;
-    document.getElementById('pdp-price-wrapper').style.display = 'inline-flex';
+    document.getElementById('pdp-price-wrapper').classList.remove('hidden');
   } else {
-    document.getElementById('pdp-price-wrapper').style.display = 'none';
+    document.getElementById('pdp-price-wrapper').classList.add('hidden');
   }
 
   // Update WhatsApp link with product name

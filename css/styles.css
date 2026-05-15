@@ -17,6 +17,7 @@
   --radius-lg: 12px;
 }
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+.hidden { display: none !important; }
 html { scroll-behavior:smooth; overflow-x:hidden; width:100%; position:relative; }
 body { font-family:var(--sans); color:var(--text-dark); background:var(--white); line-height:1.6; overflow-x:hidden; width:100%; position:relative; }
 h1,h2,h3 { font-family:var(--serif); font-weight:400; }

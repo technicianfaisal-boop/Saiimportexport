@@ -103,7 +103,7 @@
 .pdp-why-choose { padding: 4rem 5%; background: var(--green-dark); color: #fff; }
 .pdp-why-choose h2 { color: #fff; }
 .why-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
-.why-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 2rem 1.5rem; border-radius: 16px; transition: all 0.3s; }
+.why-card { background: rgba(255,255,255,0.08); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 2rem 1.5rem; border-radius: 16px; transition: all 0.3s; }
 .why-card:hover { background: rgba(255,255,255,0.14); transform: translateY(-5px); }
 .why-icon { font-size: 2rem; display: block; margin-bottom: 1rem; }
 .why-card h3 { font-size: 1.05rem; margin-bottom: 0.5rem; color: #fff; }
