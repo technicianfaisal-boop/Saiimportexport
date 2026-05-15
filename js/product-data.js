@@ -12,7 +12,7 @@ const PRODUCT_DETAILS = {
       'We supply 1121 Basmati in multiple variants to suit your market needs: White/Creamy Sella (parboiled for extra strength and separate grains), Steam (steamed to lock in nutrients and flavor), and Golden Sella (parboiled to achieve a beautiful golden hue and maximum cooking yield).',
       'Our 1121 Basmati goes through rigorous sortex cleaning and aging to ensure zero impurities, consistent grain length, and optimal moisture content. It is a staple in Middle Eastern, European, and American markets.'
     ],
-    image: 'images/1121-basmati.png',
+    image: 'images/1121-basmati.webp',
     specs: {
       price: '$0.66 / kg',
       moq: '25 MT',
@@ -57,7 +57,7 @@ const PRODUCT_DETAILS = {
       'At SAI Import Export Agro, we supply 1509 Basmati in White/Creamy Sella, Golden Sella, and Steam variants. The Sella varieties are parboiled to ensure the grains remain separate and fluffy after cooking, making them ideal for catering, restaurants, and everyday premium meals.',
       'Our 1509 Basmati is meticulously processed using advanced milling and sortex technology. It is highly demanded across the Gulf, Levant, and African markets for its excellent cooking characteristics and affordability.'
     ],
-    image: 'images/1509-basmati.png',
+    image: 'images/1509-basmati.webp',
     specs: {
       price: '$1.10 / kg',
       moq: '25 MT',
@@ -102,7 +102,7 @@ const PRODUCT_DETAILS = {
       'SAI Import Export Agro provides premium Sona Masoori Steam Rice. The steaming process hardens the grain, reducing breakage during milling and cooking, while retaining its natural aroma and nutrients. It is low in starch, making it a healthier choice and easy to digest.',
       'Ideal for everyday cooking, sweet dishes like pongal, or savory meals like idli and dosa batter preparation, our Sona Masoori is meticulously cleaned, sorted, and packed to preserve its freshness and authentic taste.'
     ],
-    image: 'images/sona-masoori.png',
+    image: 'images/sona-masoori.webp',
     specs: {
       price: '$0.65 / kg',
       moq: '25 MT',
@@ -147,7 +147,7 @@ const PRODUCT_DETAILS = {
       'Our Pusa Steam Basmati Rice undergoes a specialized steaming process before milling. This locks in the essential nutrients, hardens the grain to prevent breakage during cooking, and ensures the grains remain separate, non-sticky, and fluffy when served.',
       'SAI Import Export Agro sources the finest Pusa Basmati from the fertile regions of Northern India. It is a favorite in both domestic and international markets, particularly for preparing traditional dishes like Pulao and Biryani where aroma is paramount.'
     ],
-    image: 'images/pusa-basmati.png',
+    image: 'images/pusa-basmati.webp',
     specs: {
       price: '$0.75 / kg',
       moq: '25 MT',
@@ -192,7 +192,7 @@ const PRODUCT_DETAILS = {
       'SAI Import Export Agro\'s 1401 Steam Basmati Rice is carefully processed. The steaming treatment helps the grains retain their natural vitamins and minerals while strengthening them. Upon cooking, the rice expands remarkably, offering a delightful visual presentation and a soft, delectable texture.',
       'This variety is perfectly suited for Middle Eastern cuisines, Indian festive dishes, and fine dining establishments that demand both visual appeal and authentic basmati flavor in every serving.'
     ],
-    image: 'images/1401-basmati.png',
+    image: 'images/1401-basmati.webp',
     specs: {
       price: '$1.16 / kg',
       moq: '25 MT',
@@ -237,7 +237,7 @@ const PRODUCT_DETAILS = {
       'Our Swarna Raw Rice is offered with a maximum of 5% broken grains, ensuring a high-quality product that looks good and cooks well. Being a raw rice (un-parboiled), it cooks relatively quickly, has a soft texture, and a mild, pleasant flavor that pairs well with a variety of curries and gravies.',
       'SAI Import Export Agro ensures that our Swarna rice is thoroughly cleaned, de-stoned, and sortexed to remove impurities, providing a clean, ready-to-cook product suitable for mass consumption, government tenders, and retail markets.'
     ],
-    image: 'images/swarna-raw.png',
+    image: 'images/swarna-raw.webp',
     specs: {
       price: '$0.96 / kg',
       moq: '25 MT',
@@ -282,7 +282,7 @@ const PRODUCT_DETAILS = {
       'The parboiling process (partially boiling the rice in its husk) drives nutrients from the bran into the grain, making IR 64 Parboiled rice more nutritious than regular white rice. It also hardens the grain, making it highly resistant to overcooking and ensuring the grains remain separate and firm.',
       'SAI Import Export Agro supplies premium IR 64 Parboiled Rice with a maximum of 5% broken grains. It is meticulously sortexed for a uniform golden-yellow color and free from impurities, making it ideal for daily consumption, catering, and institutional feeding.'
     ],
-    image: 'images/ir64-parboiled.png',
+    image: 'images/ir64-parboiled.webp',
     specs: {
       price: '$0.73 / kg',
       moq: '25 MT',
@@ -327,7 +327,7 @@ const PRODUCT_DETAILS = {
       'Unlike the long-grained basmati used in Northern Indian biryanis, Jeerakasala is the quintessential rice for authentic Malabar and Thalassery Biryanis. The small, firm grains absorb spices and ghee beautifully, creating a rich, flavorful, and aromatic culinary experience.',
       'SAI Import Export Agro sources authentic Jeerakasala rice, ensuring it is aged perfectly to enhance its fragrance and reduce moisture. It is a premium offering for diaspora markets, specialty Indian grocery stores, and authentic South Indian restaurants worldwide.'
     ],
-    image: 'images/jeerakasala.png',
+    image: 'images/jeerakasala.webp',
     specs: {
       price: '$1.04 / kg',
       moq: '25 MT',
@@ -372,7 +372,7 @@ const PRODUCT_DETAILS = {
       'SAI Import Export Agro provides silky sortexed broken rice, meaning it undergoes rigorous cleaning to remove discolored grains, dust, and foreign particles, resulting in a clean, bright white product. We offer various sizes of broken rice depending on buyer requirements.',
       'This product is widely used for human consumption (in porridges or traditional dishes), in the brewing industry for beer production, for manufacturing rice flour and noodles, and as a high-quality ingredient in premium animal and pet feed.'
     ],
-    image: 'images/broken-rice.png',
+    image: 'images/broken-rice.webp',
     specs: {
       price: '$0.50 / kg',
       moq: '25 MT',
@@ -417,7 +417,7 @@ const PRODUCT_DETAILS = {
       'Unlike new crop rice which can turn sticky and mushy when cooked, our Old Crop Sona Masoori cooks perfectly. The grains remain separate, fluffy, and expand significantly, offering a much higher yield per kilogram. It also absorbs flavors and gravies much more effectively.',
       'SAI Import Export Agro ensures that our aged Sona Masoori is stored safely to prevent any infestation while developing its mature characteristics. It is the preferred choice for households and restaurants that demand the perfect, non-sticky rice for everyday meals.'
     ],
-    image: 'images/sona-masoori-old.png',
+    image: 'images/sona-masoori-old.webp',
     specs: {
       price: '$0.69 / kg',
       moq: '25 MT',

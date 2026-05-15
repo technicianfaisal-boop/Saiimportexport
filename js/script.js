@@ -1,15 +1,15 @@
 // ==================== PRODUCT DATA ====================
 const PRODUCT_IMAGES = {
-  '1121-basmati': 'images/1121-basmati.png',
-  '1509-basmati': 'images/1509-basmati.png',
-  'sona-masoori': 'images/sona-masoori.png',
-  'pusa-basmati': 'images/pusa-basmati.png',
-  '1401-basmati': 'images/1401-basmati.png',
-  'swarna-raw': 'images/swarna-raw.png',
-  'ir64-parboiled': 'images/ir64-parboiled.png',
-  'jeerakasala': 'images/jeerakasala.png',
-  'broken-rice': 'images/broken-rice.png',
-  'sona-masoori-old': 'images/sona-masoori-old.png'
+  '1121-basmati': 'images/1121-basmati.webp',
+  '1509-basmati': 'images/1509-basmati.webp',
+  'sona-masoori': 'images/sona-masoori.webp',
+  'pusa-basmati': 'images/pusa-basmati.webp',
+  '1401-basmati': 'images/1401-basmati.webp',
+  'swarna-raw': 'images/swarna-raw.webp',
+  'ir64-parboiled': 'images/ir64-parboiled.webp',
+  'jeerakasala': 'images/jeerakasala.webp',
+  'broken-rice': 'images/broken-rice.webp',
+  'sona-masoori-old': 'images/sona-masoori-old.webp'
 };
 
 // Products array removed, falling back to PRODUCT_DETAILS from product-data.js
