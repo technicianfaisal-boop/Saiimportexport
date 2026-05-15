@@ -50,8 +50,11 @@ async function loadHeroSection() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   loadHeroSection();
+  // Load products from Supabase (falls back to static data)
+  if (typeof loadProductsFromDB === 'function') await loadProductsFromDB();
+  renderProducts();
   buildProductInterestCheckboxes();
   buildFooterProducts();
 });
@@ -211,7 +214,7 @@ async function renderProducts() {
   });
 }
 
-renderProducts();
+
 
 // ==================== NAVBAR SCROLL ====================
 const navbar = document.getElementById('navbar');
@@ -305,23 +308,25 @@ if (modal) {
 // ==================== CHATBOT (GEMINI AI) ====================
 // The API Key is securely managed in Supabase and accessed via the /api/chat backend
 
-if (typeof PRODUCT_DETAILS !== 'undefined') {
-  ALL_PRODUCTS_TEXT = Object.values(PRODUCT_DETAILS).map(p => `
+function buildProductsText() {
+  if (typeof PRODUCT_DETAILS === 'undefined' || !Object.keys(PRODUCT_DETAILS).length) return 'Products info will be loaded dynamically.';
+  return Object.values(PRODUCT_DETAILS).map(p => `
 [Product: ${p.name}]
-Tagline: ${p.heroTagline}
-Description: ${p.shortDesc}
-Specifications: MOQ: ${p.specs.moq}, HS Code: ${p.specs.hsCode}, Origin: ${p.specs.origin}, Shelf Life: ${p.specs.shelfLife}, Grade: ${p.specs.grade}, Load: ${p.specs.loadPerContainer}
-Packaging Options: ${p.packaging.map(pkg => pkg.type).join(' | ')}
-Why Choose Us for this: ${p.whyChoose.map(w => w.title).join(', ')}
+Tagline: ${p.heroTagline || p.name}
+Description: ${p.shortDesc || ''}
+Specifications: MOQ: ${p.specs?.moq || 'N/A'}, HS Code: ${p.specs?.hsCode || 'N/A'}, Origin: ${p.specs?.origin || 'India'}, Shelf Life: ${p.specs?.shelfLife || 'N/A'}, Grade: ${p.specs?.grade || 'N/A'}, Load: ${p.specs?.loadPerContainer || 'N/A'}
+Packaging Options: ${(p.packaging || []).map(pkg => pkg.type).join(' | ') || 'Standard export packaging'}
+Why Choose Us for this: ${(p.whyChoose || []).map(w => w.title).join(', ') || 'Premium quality'}
 `).join('\n');
 }
 
-const SYSTEM_PROMPT = `You are the AI sales assistant for SAI Import Export Agro, a leading Indian exporter of premium rice. You are helpful, professional, and highly knowledgeable.
+function getSystemPrompt() {
+  return `You are the AI sales assistant for SAI Import Export Agro, a leading Indian exporter of premium rice. You are helpful, professional, and highly knowledgeable.
 
 IMPORTANT: You must always reply in the SAME language the user is speaking.
 
 Our Detailed Product Knowledge Base:
-${ALL_PRODUCTS_TEXT}
+${buildProductsText()}
 
 Company & Export Information:
 - Shipping ports: Nhava Sheva (Mumbai), Mundra, Haldia, Chennai
@@ -362,6 +367,7 @@ Email: {user_email}
 Requirements: {user_requirements}
 [/LEAD_COLLECTED]
 After appending this block, thank them and tell them the sales team will email them a custom quote within 24 hours.`;
+}
 
 const chatToggle = document.getElementById('chatbot-toggle');
 const chatWindow = document.getElementById('chatbot-window');
@@ -452,7 +458,7 @@ async function getGeminiReply(userMsg) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        system_instruction: { parts: [{ text: getSystemPrompt() }] },
         contents: recentHistory
       })
     });

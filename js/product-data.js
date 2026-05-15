@@ -1,5 +1,5 @@
 // ==================== SAI IMPORT EXPORT AGRO PRODUCT DATA ====================
-const PRODUCT_DETAILS = {
+const PRODUCT_DETAILS_STATIC = {
 
   '1121-basmati': {
     id: '1121-basmati',
@@ -452,3 +452,43 @@ const PRODUCT_DETAILS = {
   }
 
 };
+
+// This will be populated from Supabase DB. Falls back to static data above.
+let PRODUCT_DETAILS = {};
+
+async function loadProductsFromDB() {
+  // Start with static data as base
+  PRODUCT_DETAILS = JSON.parse(JSON.stringify(PRODUCT_DETAILS_STATIC));
+
+  if (typeof saiDB === 'undefined') return;
+
+  try {
+    const { data, error } = await saiDB.from('products').select('*').order('id');
+    if (error || !data || data.length === 0) return;
+
+    // Merge DB products: DB overrides basic fields, static provides extended fields
+    data.forEach(p => {
+      const existing = PRODUCT_DETAILS[p.id] || {};
+      PRODUCT_DETAILS[p.id] = {
+        ...existing,
+        id: p.id,
+        name: p.name || existing.name,
+        tag: p.tag || existing.tag,
+        shortDesc: p.short_desc || existing.shortDesc,
+        longDesc: p.description ? [p.description] : existing.longDesc,
+        image: p.img || existing.image,
+        specs: {
+          ...(existing.specs || {}),
+          ...(p.specs || {})
+        },
+        // Keep extended fields from static if available
+        heroTagline: existing.heroTagline || p.name,
+        specTable: existing.specTable || [],
+        packaging: existing.packaging || [],
+        whyChoose: existing.whyChoose || []
+      };
+    });
+  } catch (err) {
+    console.warn('Failed to load products from DB, using static fallback:', err);
+  }
+}
