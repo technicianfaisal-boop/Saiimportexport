@@ -120,8 +120,12 @@ function editProduct(id) {
     // Populate Variants
     var vContainer = document.getElementById('variants-container');
     vContainer.innerHTML = '';
-    if (p.specs && p.specs.variants && Array.isArray(p.specs.variants)) {
+    if (p.specs && p.specs.variants && Array.isArray(p.specs.variants) && p.specs.variants.length > 0) {
         p.specs.variants.forEach(function(v) { addVariantRow(v.name, v.price); });
+    } else if (p.specs && p.specs.price) {
+        addVariantRow('Default', p.specs.price);
+    } else {
+        addVariantRow('', '');
     }
     
     // Clean specs JSON from variants/seo to show raw other specs
