@@ -109,7 +109,7 @@
         .btn-full { width: 100%; }
 
         /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(2px); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 15px; -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
         .modal-content { background: white; border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal-close { position: absolute; top: 15px; right: 15px; background: #f4f6f8; border: none; font-size: 1.2rem; cursor: pointer; color: #555; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
@@ -136,6 +136,31 @@
             td:before { font-weight: 600; color: #555; min-width: 80px; font-size: 0.8rem; }
             .form-row { flex-direction: column; gap: 15px; }
         }
+
+        /* Utility classes to eliminate inline styles */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mb-10 { margin-bottom: 10px; }
+        .mt-12 { margin-top: 12px; }
+        .mt-8 { margin-top: 8px; }
+        .hidden-input { display: none; }
+        .settings-hint { font-size: 0.75rem; color: #666; margin-bottom: 10px; }
+        .settings-hint-sm { font-size: 0.7rem; color: #888; margin-top: 8px; }
+        .upload-zone { margin-top: 8px; border: 2px dashed #4a7c59; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; background: #f0f7f2; }
+        .upload-zone-sm { margin-top: 6px; border: 2px dashed #4a7c59; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; background: #f0f7f2; }
+        .upload-label { color: #4a7c59; font-weight: 600; font-size: 0.78rem; margin: 4px 0 0; }
+        .upload-label-sm { color: #4a7c59; font-weight: 600; font-size: 0.75rem; margin: 3px 0 0; }
+        .upload-hint { color: #888; font-size: 0.7rem; }
+        .preview-img { max-width: 200px; max-height: 120px; border-radius: 8px; }
+        .preview-img-sm { max-width: 160px; max-height: 120px; border-radius: 8px; }
+        .preview-img-blog { max-width: 150px; max-height: 80px; border-radius: 6px; }
+        .preview-info { color: #4a7c59; font-size: 0.75rem; font-weight: 600; margin: 4px 0; }
+        .preview-info-sm { color: #4a7c59; font-size: 0.78rem; font-weight: 600; margin: 4px 0; }
+        .preview-info-blog { color: #4a7c59; font-size: 0.72rem; font-weight: 600; margin: 3px 0; }
+        .btn-remove { background: #e74c3c; color: #fff; border: none; padding: 3px 10px; border-radius: 6px; cursor: pointer; font-size: 0.72rem; }
+        .btn-remove-sm { background: #e74c3c; color: #fff; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; cursor: pointer; }
+        .seo-box { background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd; }
+        .seo-box h4 { margin: 0 0 8px; font-size: 0.85rem; color: #444; }
     </style>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2d5a3c">
@@ -213,13 +238,13 @@
 
                     <!-- TAB: PRODUCTS -->
                     <div id="tab-products" class="tab-panel">
-                <div style="margin-bottom:10px;text-align:right;">
+                <div class="mb-10 text-right">
                     <button class="btn-cta" onclick="openProductModal()">+ Add Product</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead><tr><th>Img</th><th>ID</th><th>Name</th><th>Tag</th><th>Price</th><th>Actions</th></tr></thead>
-                        <tbody id="product-table-body"><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody>
+                        <tbody id="product-table-body"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -229,20 +254,20 @@
                 <div class="table-wrapper">
                     <table>
                         <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead>
-                        <tbody id="enquiry-table-body"><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody>
+                        <tbody id="enquiry-table-body"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
             <!-- TAB: BLOG -->
             <div id="tab-blog" class="tab-panel">
-                <div style="margin-bottom:10px;text-align:right;">
+                <div class="mb-10 text-right">
                     <button class="btn-cta" onclick="openBlogModal()">+ New Post</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead><tr><th>Title</th><th>Slug</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
-                        <tbody id="blog-table-body"><tr><td colspan="5" style="text-align:center">Loading...</td></tr></tbody>
+                        <tbody id="blog-table-body"><tr><td colspan="5" class="text-center">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -253,15 +278,15 @@
                     <!-- WhatsApp Settings -->
                     <div class="setting-card">
                         <h3>💬 WhatsApp Notifications</h3>
-                        <p style="font-size: 0.75rem; color: #666; margin-bottom: 10px;">Receive instant alerts for new enquiries via CallMeBot.</p>
+                        <p class="settings-hint">Receive instant alerts for new enquiries via CallMeBot.</p>
                         <label>WhatsApp Phone Number</label>
                         <input type="text" id="wa_phone" placeholder="e.g. +919876543210 (include country code)">
                         <label>CallMeBot API Key</label>
                         <input type="text" id="wa_apikey" placeholder="e.g. 1234567">
-                        <p style="font-size: 0.7rem; color: #888; margin-top: 8px;">
+                        <p class="settings-hint-sm">
                             <strong>Setup:</strong> Save +34 644 71 84 82 in your phone contacts and send "I allow callmebot to send me messages" on WhatsApp to get your API key.
                         </p>
-                        <button class="btn-cta btn-full" style="margin-top:12px" onclick="saveWhatsAppSettings()">💾 Save WhatsApp Settings</button>
+                        <button class="btn-cta btn-full mt-12" onclick="saveWhatsAppSettings()">💾 Save WhatsApp Settings</button>
                     </div>
                     
                     <!-- Hero Settings -->
@@ -277,7 +302,7 @@
                         <input type="text" id="hero_cta_text" placeholder="e.g. Explore Our Products">
                         <label>Button Link</label>
                         <input type="text" id="hero_cta_link" placeholder="e.g. #products">
-                        <button class="btn-cta btn-full" style="margin-top:12px" onclick="saveHeroSettings()">💾 Save Hero Settings</button>
+                        <button class="btn-cta btn-full mt-12" onclick="saveHeroSettings()">💾 Save Hero Settings</button>
                     </div>
 
                     <!-- Hero Background Image -->
@@ -285,19 +310,19 @@
                         <h3>🖼️ Hero Background Image</h3>
                         <label>Image URL (or upload below)</label>
                         <input type="text" id="hero_bg_img" placeholder="images/hero_bg.webp">
-                        <div id="hero-img-upload" style="margin-top:8px;border:2px dashed #4a7c59;border-radius:10px;padding:15px;text-align:center;cursor:pointer;background:#f0f7f2;" onclick="document.getElementById('hero-img-input').click()">
+                        <div id="hero-img-upload" class="upload-zone" onclick="document.getElementById('hero-img-input').click()">
                             <div id="hero-img-prompt">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                                <p style="color:#4a7c59;font-weight:600;font-size:0.78rem;margin:4px 0 0">Click to upload hero image</p>
-                                <p style="color:#888;font-size:0.7rem">Auto-compressed to WebP • 1200px max</p>
+                                <p class="upload-label">Click to upload hero image</p>
+                                <p class="upload-hint">Auto-compressed to WebP • 1200px max</p>
                             </div>
-                            <div id="hero-img-preview" style="display:none">
-                                <img id="hero-preview-img" style="max-width:200px;max-height:120px;border-radius:8px">
-                                <p id="hero-img-info" style="color:#4a7c59;font-size:0.75rem;font-weight:600;margin:4px 0"></p>
+                            <div id="hero-img-preview" class="hidden-input">
+                                <img id="hero-preview-img" class="preview-img">
+                                <p id="hero-img-info" class="preview-info"></p>
                             </div>
                         </div>
-                        <input type="file" id="hero-img-input" accept="image/*" style="display:none">
-                        <button class="btn-cta btn-full" style="margin-top:10px" onclick="saveHeroImage()">💾 Save Hero Image</button>
+                        <input type="file" id="hero-img-input" accept="image/*" class="hidden-input">
+                        <button class="btn-cta btn-full mt-8" onclick="saveHeroImage()">💾 Save Hero Image</button>
                     </div>
                 </div>
                 </div>
@@ -325,22 +350,22 @@
                     <div id="img-upload-area">
                         <div id="img-upload-prompt">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                            <p style="color:#4a7c59;font-weight:600;">Click or drag image here</p>
-                            <p style="color:#888;font-size:0.72rem;">Auto-compressed to WebP</p>
+                            <p class="upload-label">Click or drag image here</p>
+                            <p class="upload-hint">Auto-compressed to WebP</p>
                         </div>
-                        <div id="img-preview-box" style="display:none;">
-                            <img id="img-preview" style="max-width:160px;max-height:120px;border-radius:8px;">
-                            <p id="img-size-info" style="color:#4a7c59;font-size:0.78rem;font-weight:600;margin:4px 0"></p>
-                            <button type="button" onclick="clearImageUpload()" style="background:#e74c3c;color:#fff;border:none;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;">✕ Remove</button>
+                        <div id="img-preview-box" class="hidden-input">
+                            <img id="img-preview" class="preview-img-sm">
+                            <p id="img-size-info" class="preview-info-sm"></p>
+                            <button type="button" onclick="clearImageUpload()" class="btn-remove">✕ Remove</button>
                         </div>
                     </div>
-                    <input type="file" id="img-file-input" accept="image/*" style="display:none;">
+                    <input type="file" id="img-file-input" accept="image/*" class="hidden-input">
                 </div>
                 <div class="form-group"><label>Short Description</label><input type="text" id="p_short_desc" class="form-control" required></div>
                 <div class="form-group"><label>Description</label><textarea id="p_desc" class="form-control" rows="2" required></textarea></div>
                 <div class="form-group"><label>Specs (JSON)</label><textarea id="p_specs" class="form-control" rows="3" placeholder='{"AGL":"8.30mm","Moisture":"12% Max"}' required></textarea></div>
-                <div style="background:#f5f5f5;padding:10px;border-radius:8px;margin-bottom:15px;border:1px solid #ddd;">
-                    <h4 style="margin:0 0 8px;font-size:0.85rem;color:#444;">🔍 SEO Settings</h4>
+                <div class="seo-box">
+                    <h4>🔍 SEO Settings</h4>
                     <div class="form-group"><label>Meta Title</label><input type="text" id="p_seo_title" class="form-control" placeholder="e.g. Premium 1121 Basmati Rice Exporter"></div>
                     <div class="form-group"><label>Meta Description</label><textarea id="p_seo_desc" class="form-control" rows="2" placeholder="e.g. Buy high-quality 1121 Basmati..."></textarea></div>
                 </div>
@@ -361,18 +386,18 @@
                 <div class="form-group">
                     <label>Cover Image</label>
                     <input type="text" id="blog_cover" class="form-control" placeholder="Auto-filled on upload or enter URL">
-                    <div id="blog-img-upload" style="margin-top:6px;border:2px dashed #4a7c59;border-radius:8px;padding:12px;text-align:center;cursor:pointer;background:#f0f7f2;" onclick="document.getElementById('blog-img-input').click()">
+                    <div id="blog-img-upload" class="upload-zone-sm" onclick="document.getElementById('blog-img-input').click()">
                         <div id="blog-img-prompt">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                            <p style="color:#4a7c59;font-weight:600;font-size:0.75rem;margin:3px 0 0">Upload cover image</p>
+                            <p class="upload-label-sm">Upload cover image</p>
                         </div>
-                        <div id="blog-img-preview" style="display:none">
-                            <img id="blog-preview-img" style="max-width:150px;max-height:80px;border-radius:6px">
-                            <p id="blog-img-info" style="color:#4a7c59;font-size:0.72rem;font-weight:600;margin:3px 0"></p>
-                            <button type="button" onclick="event.stopPropagation();clearBlogImage()" style="background:#e74c3c;color:#fff;border:none;padding:2px 8px;border-radius:4px;font-size:0.68rem;cursor:pointer">✕</button>
+                        <div id="blog-img-preview" class="hidden-input">
+                            <img id="blog-preview-img" class="preview-img-blog">
+                            <p id="blog-img-info" class="preview-info-blog"></p>
+                            <button type="button" onclick="event.stopPropagation();clearBlogImage()" class="btn-remove-sm">✕</button>
                         </div>
                     </div>
-                    <input type="file" id="blog-img-input" accept="image/*" style="display:none">
+                    <input type="file" id="blog-img-input" accept="image/*" class="hidden-input">
                 </div>
                 <div class="form-group"><label>Excerpt</label><textarea id="blog_excerpt" class="form-control" rows="2" placeholder="Short summary for listing page"></textarea></div>
                 <div class="form-group"><label>Content (HTML)</label><textarea id="blog_content" class="form-control" rows="6" required placeholder="Full blog post content..."></textarea></div>
