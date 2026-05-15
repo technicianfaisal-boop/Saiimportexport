@@ -18,7 +18,7 @@
           name: data.name,
           tag: data.tag,
           shortDesc: data.short_desc,
-          longDesc: data.desc ? [data.desc] : (p?.longDesc || []),
+          longDesc: data.description ? [data.description] : (p?.longDesc || []),
           image: data.img || p?.image,
           specs: data.specs || p?.specs || {}
         };

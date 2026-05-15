@@ -129,7 +129,7 @@ function editProduct(id) {
     document.getElementById('p_tag').value = p.tag;
     document.getElementById('p_price').value = p.specs?.price || '';
     document.getElementById('p_short_desc').value = p.short_desc;
-    document.getElementById('p_desc').value = p.desc;
+    document.getElementById('p_desc').value = p.description;
     
     // Convert specs JSON back to string
     document.getElementById('p_specs').value = JSON.stringify(p.specs, null, 2);
@@ -165,7 +165,7 @@ productForm.addEventListener('submit', async (e) => {
         name: document.getElementById('p_name').value,
         tag: document.getElementById('p_tag').value,
         short_desc: document.getElementById('p_short_desc').value,
-        desc: document.getElementById('p_desc').value,
+        description: document.getElementById('p_desc').value,
         img: document.getElementById('p_img').value,
         specs: specsData
     };

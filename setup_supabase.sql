@@ -5,7 +5,7 @@ CREATE TABLE products (
   name text NOT NULL,
   tag text,
   short_desc text,
-  desc text,
+  description text,
   img text,
   specs jsonb
 );

@@ -38,7 +38,7 @@ async function renderProducts() {
           id: p.id,
           name: p.name,
           tag: p.tag,
-          desc: p.short_desc || p.desc,
+          desc: p.short_desc || p.description,
           price: p.specs?.price || '',
           img: p.img
         }));
