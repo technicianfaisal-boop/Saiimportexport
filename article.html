@@ -251,20 +251,46 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/blog-data.js"></script>
     <script src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const articleId = params.get('id');
             const container = document.getElementById('article-container');
 
-            if (!articleId || typeof BLOG_POSTS === 'undefined') {
+            if (!articleId) {
                 showError();
                 return;
             }
 
-            const article = BLOG_POSTS.find(p => p.id === articleId);
+            let article = null;
+
+            // 1. Try to fetch from Supabase
+            if (typeof saiDB !== 'undefined' && saiDB) {
+                try {
+                    const { data, error } = await saiDB.from('blog_posts').select('*').eq('slug', articleId).single();
+                    if (!error && data) {
+                        article = {
+                            id: data.slug,
+                            title: data.title,
+                            category: 'Market Update',
+                            date: new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                            image: data.cover_img || 'images/hero_bg.webp',
+                            content: data.content_html
+                        };
+                    }
+                } catch (e) {
+                    console.warn("Failed to load article from Supabase, using local fallback.", e);
+                }
+            }
+
+            // 2. Fallback to local data
+            if (!article && typeof BLOG_POSTS !== 'undefined') {
+                article = BLOG_POSTS.find(p => p.id === articleId);
+            }
 
             if (!article) {
                 showError();

@@ -273,36 +273,65 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/blog-data.js"></script>
     <script src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const grid = document.getElementById('blog-grid');
-            if(typeof BLOG_POSTS !== 'undefined' && grid) {
-                BLOG_POSTS.forEach(post => {
-                    const card = document.createElement('a');
-                    card.href = `article.html?id=${post.id}`;
-                    card.className = 'blog-card';
-                    card.innerHTML = `
-                        <div class="blog-img-wrap">
-                            <span class="blog-category">${post.category}</span>
-                            <img src="${post.image}" alt="${post.title}" loading="lazy">
-                        </div>
-                        <div class="blog-content">
-                            <div class="blog-date">${post.date}</div>
-                            <h3 class="blog-title">${post.title}</h3>
-                            <p class="blog-excerpt">${post.excerpt}</p>
-                            <div class="blog-read-more">
-                                Read Article 
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                                </svg>
-                            </div>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
+            if (!grid) return;
+
+            let postsToRender = [];
+
+            // 1. Try to fetch from Supabase
+            if (typeof saiDB !== 'undefined' && saiDB) {
+                try {
+                    const { data, error } = await saiDB.from('blog_posts').select('*').eq('status', 'published').order('created_at', { ascending: false });
+                    if (!error && data && data.length > 0) {
+                        postsToRender = data.map(post => ({
+                            id: post.slug, // Use slug for article URL
+                            title: post.title,
+                            excerpt: post.excerpt,
+                            image: post.cover_img || 'images/hero_bg.webp',
+                            date: new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                            category: 'Market Update' // Default category
+                        }));
+                    }
+                } catch (e) {
+                    console.warn("Failed to load blogs from Supabase, using local fallback.", e);
+                }
             }
+
+            // 2. Fallback to local data if DB fetch failed or empty
+            if (postsToRender.length === 0 && typeof BLOG_POSTS !== 'undefined') {
+                postsToRender = BLOG_POSTS;
+            }
+
+            // 3. Render
+            postsToRender.forEach(post => {
+                const card = document.createElement('a');
+                card.href = `article.html?id=${post.id}`;
+                card.className = 'blog-card';
+                card.innerHTML = `
+                    <div class="blog-img-wrap">
+                        <span class="blog-category">${post.category}</span>
+                        <img src="${post.image}" alt="${post.title}" loading="lazy">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-date">${post.date}</div>
+                        <h3 class="blog-title">${post.title}</h3>
+                        <p class="blog-excerpt">${post.excerpt}</p>
+                        <div class="blog-read-more">
+                            Read Article 
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
         });
     </script>
     <script type="text/javascript">

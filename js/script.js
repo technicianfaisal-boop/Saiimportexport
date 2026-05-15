@@ -14,6 +14,46 @@ const PRODUCT_IMAGES = {
 
 // Products array removed, falling back to PRODUCT_DETAILS from product-data.js
 
+// ==================== DYNAMIC HERO ====================
+async function loadHeroSection() {
+  if (typeof saiDB === 'undefined') return;
+  try {
+    const { data, error } = await saiDB.from('site_settings').select('*').eq('key', 'hero').single();
+    if (!error && data && data.value) {
+      const v = data.value;
+      if (v.bg_img) {
+        const heroImg = document.getElementById('hero-img');
+        if (heroImg) heroImg.src = v.bg_img;
+      }
+      if (v.tagline) {
+        const tag = document.getElementById('hero-tag');
+        if (tag) tag.textContent = v.tagline;
+      }
+      if (v.heading) {
+        const head = document.getElementById('hero-head');
+        if (head) head.innerHTML = v.heading; // allow <br> and <em>
+      }
+      if (v.subheading) {
+        const sub = document.getElementById('hero-sub');
+        if (sub) sub.textContent = v.subheading;
+      }
+      if (v.cta_text && v.cta_link) {
+        const btn = document.getElementById('hero-btn');
+        if (btn) {
+          btn.textContent = v.cta_text;
+          btn.href = v.cta_link;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to load hero from Supabase, using local fallback.", e);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadHeroSection();
+});
+
 // ==================== RENDER PRODUCTS ====================
 const productContainer = document.getElementById('product-container');
 
