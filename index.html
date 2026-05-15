@@ -106,35 +106,29 @@
     </nav>
 
     <!-- HERO -->
-    <header class="hero split-hero" id="home">
-        <div class="hero-left">
-            <div class="hero-content">
-                <span class="hero-tag animate-in visible">PREMIUM RICE EXPORTS</span>
-                <h1 class="animate-in animate-delay-1 visible">Taste The Difference With Our Handpicked Selection</h1>
-                <p class="hero-desc animate-in animate-delay-2 visible">
-                    We supply the world's finest Basmati and Non-Basmati rice, sourced directly from pristine Indian farms and delivered with uncompromising quality.
-                </p>
-                <div class="hero-actions animate-in animate-delay-3 visible">
-                    <a href="#products" class="btn-cta">Explore Products</a>
-                    <a href="contact.html" class="btn-outline-dark">Contact Sales</a>
-                </div>
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <img src="images/hero_bg.png" alt="Lush Indian farmland" class="hero-bg-img" loading="eager">
+        <div class="hero-content animate-in visible">
+            <p class="hero-tag">🇮🇳 Trusted Indian Export Partner</p>
+            <h1>Your trusted partner in the world of<br><em>premium rice exports.</em></h1>
+            <p class="hero-desc">We source, process, and export India's finest rice varieties — 1121 Basmati, 1509 Basmati, Sona Masoori, Swarna, and more — directly from traditional farms to your doorstep, anywhere on the globe.</p>
+            <div class="hero-actions">
+                <a href="#products" class="btn-cta">Explore Our Products →</a>
+                <a href="#contact" class="btn-outline">Enquire Now →</a>
             </div>
         </div>
-        <div class="hero-right">
-            <img src="images/hero_bg.png" alt="Premium Rice Field" class="hero-bg-img" loading="eager">
-            <div class="hero-overlay-gradient"></div>
+        <div class="stats-ribbon">
+            <div class="stat"><span class="stat-num" data-target="15">0</span><span class="stat-suffix">+</span><span
+                    class="stat-label">Countries Served</span></div>
+            <div class="stat"><span class="stat-num" data-target="5000">0</span><span class="stat-suffix">MT</span><span
+                    class="stat-label">Annual Exports</span></div>
+            <div class="stat"><span class="stat-num" data-target="10">0</span><span class="stat-label">Rice
+                    Varieties</span></div>
+            <div class="stat"><span class="stat-num" data-target="100">0</span><span class="stat-suffix">%</span><span
+                    class="stat-label">Quality Assured</span></div>
         </div>
-    </header>
-
-    <!-- STATS BAND -->
-    <div class="stats-band animate-in animate-delay-3 visible">
-        <div class="stats-band-inner">
-            <div class="stat"><span class="stat-num" data-target="15">0</span><span class="stat-suffix">+</span><span class="stat-label">Countries Served</span></div>
-            <div class="stat"><span class="stat-num" data-target="5000">0</span><span class="stat-suffix">MT</span><span class="stat-label">Annual Exports</span></div>
-            <div class="stat"><span class="stat-num" data-target="10">0</span><span class="stat-label">Rice Varieties</span></div>
-            <div class="stat"><span class="stat-num" data-target="100">0</span><span class="stat-suffix">%</span><span class="stat-label">Quality Assured</span></div>
-        </div>
-    </div>
+    </section>
 
     <!-- ABOUT -->
     <section id="about" class="about">
@@ -393,12 +387,10 @@ www.saiimportexportagro.com">
         </div>
     </div>
 
-    <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-client.js"></script>
-    
-    <script src="js/product-data.js"></script>
-    <script src="js/script.js"></script>
+    <script src="js/supabase-client.js?v=2"></script>
+    <script src="js/product-data.js?v=2"></script>
+    <script src="js/script.js?v=2"></script>
     <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({

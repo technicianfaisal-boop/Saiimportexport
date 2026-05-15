@@ -12,68 +12,69 @@ const PRODUCT_IMAGES = {
   'sona-masoori-old': 'images/sona-masoori-old.png'
 };
 
-let products = [
-  { id:'1121-basmati', name:'1121 Basmati Rice', tag:'Basmati', desc:'Extra-long grain 1121 Basmati. White Sella, Golden Sella & Steam. MOQ: 25 MT.', img: 'images/1121-basmati.png' },
-  { id:'1509-basmati', name:'1509 Basmati Rice', tag:'Basmati', desc:'High yield long-grain 1509 Basmati. Excellent value. MOQ: 25 MT.', img: 'images/1509-basmati.png' },
-  { id:'sona-masoori', name:'Sona Masoori Rice', tag:'Non-Basmati', desc:'Premium lightweight, aromatic medium-grain rice. Steam & Raw. MOQ: 25 MT.', img: 'images/sona-masoori.png' },
-  { id:'pusa-basmati', name:'Pusa Basmati Rice', tag:'Basmati', desc:'Aromatic slender grains with excellent cooking qualities. MOQ: 25 MT.', img: 'images/pusa-basmati.png' },
-  { id:'1401-basmati', name:'1401 Basmati Rice', tag:'Basmati', desc:'Perfect blend of grain length and authentic aroma. MOQ: 25 MT.', img: 'images/1401-basmati.png' },
-  { id:'swarna-raw', name:'Swarna Raw Rice', tag:'Non-Basmati', desc:'High-quality affordable short-grain non-basmati rice. MOQ: 25 MT.', img: 'images/swarna-raw.png' },
-  { id:'ir64-parboiled', name:'IR 64 Parboiled', tag:'Non-Basmati', desc:'Global staple long-grain parboiled rice. Highly durable. MOQ: 25 MT.', img: 'images/ir64-parboiled.png' },
-  { id:'jeerakasala', name:'Jeerakasala Rice', tag:'Specialty', desc:'The Biryani Rice of the South. Highly aromatic short-grain. MOQ: 25 MT.', img: 'images/jeerakasala.png' },
-  { id:'broken-rice', name:'100% Broken White Rice', tag:'Broken', desc:'Silky sortexed broken rice for industrial use and feed. MOQ: 25 MT.', img: 'images/broken-rice.png' },
-  { id:'sona-masoori-old', name:'Aged Sona Masoori', tag:'Non-Basmati', desc:'Aged 12-18 months. Non-sticky texture and high yield. MOQ: 25 MT.', img: 'images/sona-masoori-old.png' }
-];
+// Products array removed, falling back to PRODUCT_DETAILS from product-data.js
 
 // ==================== RENDER PRODUCTS ====================
 const productContainer = document.getElementById('product-container');
 
-async function fetchProducts() {
-  try {
-    // Attempt to fetch live products from Supabase
-    if (typeof supabase !== 'undefined') {
-      const { data, error } = await supabase.from('products').select('*');
-      if (data && data.length > 0) {
-        products = data;
-      }
-    }
-  } catch (err) {
-    console.warn("Supabase not connected. Using local fallback products.");
-  }
-  renderProducts();
-}
-
-function renderProducts() {
+async function renderProducts() {
   if (!productContainer) return;
-  productContainer.innerHTML = ''; // Clear container
   
-  products.forEach((p, index) => {
-    // Resolve image source (dynamic from DB or local fallback)
-    const imgSrc = p.img || PRODUCT_IMAGES[p.id];
-    
+  let productsToRender = Object.values(PRODUCT_DETAILS).map(p => ({
+    id: p.id,
+    name: p.name,
+    tag: p.tag,
+    desc: p.shortDesc,
+    price: p.specs?.price || '',
+    img: p.image
+  }));
+  
+  // Try to fetch from Supabase if keys are set
+  if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
+    try {
+      const { data, error } = await supabase.from('products').select('*');
+      if (!error && data && data.length > 0) {
+        productsToRender = data.map(p => ({
+          id: p.id,
+          name: p.name,
+          tag: p.tag,
+          desc: p.short_desc || p.desc,
+          price: p.specs?.price || '',
+          img: p.img
+        }));
+      }
+    } catch (e) {
+      console.warn("Supabase fetch failed, using local fallback.", e);
+    }
+  }
+
+  productContainer.innerHTML = '';
+  productsToRender.forEach((p, index) => {
     const delayClass = `animate-delay-${(index % 4) + 1}`;
     const card = document.createElement('div');
+    const imageSrc = p.img || PRODUCT_IMAGES[p.id]; // Fallback to local image mapping if missing
+    
     card.className = `product-card animate-in ${delayClass}`;
     card.innerHTML = `
       <a href="product.html?id=${p.id}" class="product-card-img">
-        <img src="${imgSrc}" alt="${p.name}" loading="lazy">
+        <img src="${imageSrc}" alt="${p.name}" loading="lazy">
         <div class="product-img-overlay"><span>View Details →</span></div>
       </a>
       <div class="product-card-body">
         <span class="product-tag">${p.tag}</span>
         <h3><a href="product.html?id=${p.id}" style="color:inherit;">${p.name}</a></h3>
+        ${p.price ? `<div style="color:var(--green-dark);font-weight:700;font-size:1.1rem;margin:5px 0;">${p.price}</div>` : ''}
         <p>${p.desc}</p>
-        <div class="product-actions">
-          <a href="product.html?id=${p.id}" class="product-btn">View Details</a>
-          <button class="product-btn primary-btn" onclick="openCheckout('${p.id}')">Get Quote</button>
+        <div class="product-actions" style="display:flex;gap:0.5rem;">
+          <a href="product.html?id=${p.id}" class="product-btn" style="text-align:center;flex:1;">View Details →</a>
+          <button class="product-btn" style="background:var(--orange);flex:1;" onclick="openCheckout('${p.id}')">Get Quote</button>
         </div>
       </div>`;
     productContainer.appendChild(card);
   });
 }
 
-// Initialize products
-fetchProducts();
+renderProducts();
 
 // ==================== NAVBAR SCROLL ====================
 const navbar = document.getElementById('navbar');

@@ -88,6 +88,7 @@ function renderTable() {
             <td><strong>${p.id}</strong></td>
             <td>${p.name}</td>
             <td><span class="product-tag">${p.tag}</span></td>
+            <td><strong>${p.specs?.price || 'N/A'}</strong></td>
             <td>
                 <div class="actions">
                     <button class="btn-edit" onclick="editProduct('${p.id}')">Edit</button>
@@ -126,6 +127,7 @@ function editProduct(id) {
     document.getElementById('p_name').value = p.name;
     document.getElementById('p_img').value = p.img;
     document.getElementById('p_tag').value = p.tag;
+    document.getElementById('p_price').value = p.specs?.price || '';
     document.getElementById('p_short_desc').value = p.short_desc;
     document.getElementById('p_desc').value = p.desc;
     
@@ -148,6 +150,14 @@ productForm.addEventListener('submit', async (e) => {
         alert("Invalid JSON format in Specifications!");
         btn.innerText = 'Save Product';
         return;
+    }
+    
+    // Merge explicit price field into specs
+    const priceVal = document.getElementById('p_price').value;
+    if (priceVal) {
+        specsData.price = priceVal;
+    } else {
+        delete specsData.price;
     }
     
     const productData = {

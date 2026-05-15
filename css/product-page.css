@@ -16,7 +16,38 @@
 .pdp-tag { position: absolute; top: 20px; left: 20px; background: var(--green); color: #fff; padding: 0.4rem 1.2rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
 .pdp-hero-info h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.15; margin-bottom: 0.5rem; color: var(--text-dark); }
 .pdp-tagline { color: var(--orange); font-weight: 600; font-size: 1rem; margin-bottom: 1rem; letter-spacing: 0.5px; }
-.pdp-short-desc { color: var(--text-mid); font-size: 1rem; line-height: 1.7; margin-bottom: 2rem; }
+.pdp-short-desc {
+    color: var(--text-dark);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.pdp-price-wrapper {
+    background: #fdf5ef;
+    border-left: 4px solid var(--orange);
+    padding: 12px 20px;
+    margin-bottom: 25px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.price-label {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.price-value {
+    font-size: 1.6rem;
+    color: var(--green-dark);
+    font-weight: 700;
+    font-family: var(--font-heading);
+}
 
 /* KEY SPECS */
 .pdp-key-specs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }

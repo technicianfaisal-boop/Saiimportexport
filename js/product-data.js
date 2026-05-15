@@ -14,6 +14,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/1121-basmati.png',
     specs: {
+      price: '$0.66 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -58,6 +59,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/1509-basmati.png',
     specs: {
+      price: '$1.10 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -102,6 +104,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/sona-masoori.png',
     specs: {
+      price: '$0.65 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -146,6 +149,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/pusa-basmati.png',
     specs: {
+      price: '$0.75 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -190,6 +194,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/1401-basmati.png',
     specs: {
+      price: '$1.16 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -234,6 +239,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/swarna-raw.png',
     specs: {
+      price: '$0.96 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -278,6 +284,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/ir64-parboiled.png',
     specs: {
+      price: '$0.73 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -322,6 +329,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/jeerakasala.png',
     specs: {
+      price: '$1.04 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',
@@ -366,6 +374,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/broken-rice.png',
     specs: {
+      price: '$0.50 / kg',
       moq: '25 MT',
       hsCode: '1006.40',
       shelfLife: '24 months',
@@ -410,6 +419,7 @@ const PRODUCT_DETAILS = {
     ],
     image: 'images/sona-masoori-old.png',
     specs: {
+      price: '$0.69 / kg',
       moq: '25 MT',
       hsCode: '1006.30',
       shelfLife: '24 months',

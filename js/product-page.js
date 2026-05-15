@@ -1,11 +1,34 @@
 // ==================== PRODUCT PAGE RENDERER ====================
 
-(function () {
+(async function () {
   // Get product ID from URL
   const params = new URLSearchParams(window.location.search);
   const productId = params.get('id');
 
-  if (!productId || !PRODUCT_DETAILS[productId]) {
+  let p = PRODUCT_DETAILS[productId];
+
+  // Try to fetch from Supabase if keys are set
+  if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
+    try {
+      const { data, error } = await supabase.from('products').select('*').eq('id', productId).single();
+      if (!error && data) {
+        p = {
+          ...(p || { longDesc: [], packaging: [], whyChoose: [], specTable: [] }), // Merge local static assets if available
+          id: data.id,
+          name: data.name,
+          tag: data.tag,
+          shortDesc: data.short_desc,
+          longDesc: data.desc ? [data.desc] : (p?.longDesc || []),
+          image: data.img || p?.image,
+          specs: data.specs || p?.specs || {}
+        };
+      }
+    } catch (e) {
+      console.warn("Supabase fetch failed, using local fallback.", e);
+    }
+  }
+
+  if (!p || !p.name) {
     document.body.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;font-family:Inter,sans-serif;">
         <h1 style="font-size:3rem;color:#e8772e;margin-bottom:1rem;">404</h1>
@@ -15,11 +38,9 @@
     return;
   }
 
-  const p = PRODUCT_DETAILS[productId];
-
   // SEO — Title & Meta
-  document.getElementById('page-title').textContent = `${p.name} Exporter India | FARMEXO`;
-  document.getElementById('page-desc').setAttribute('content', `${p.shortDesc} Export from India with FARMEXO. ${p.specs.moq} MOQ. HS Code: ${p.specs.hsCode}`);
+  document.getElementById('page-title').textContent = `${p.name} Exporter India | SAI Import Export Agro`;
+  document.getElementById('page-desc').setAttribute('content', `${p.shortDesc} Export from India with SAI. ${p.specs?.moq || ''} MOQ.`);
 
   // Breadcrumb
   document.getElementById('breadcrumb-name').textContent = p.name;
@@ -29,8 +50,16 @@
   document.getElementById('pdp-image').alt = p.name;
   document.getElementById('pdp-tag').textContent = p.tag;
   document.getElementById('pdp-name').textContent = p.name;
-  document.getElementById('pdp-tagline').textContent = p.heroTagline;
+  document.getElementById('pdp-tagline').textContent = p.heroTagline || '';
   document.getElementById('pdp-short-desc').textContent = p.shortDesc;
+
+  // Price
+  if (p.specs && p.specs.price) {
+    document.getElementById('pdp-price').textContent = p.specs.price;
+    document.getElementById('pdp-price-wrapper').style.display = 'inline-flex';
+  } else {
+    document.getElementById('pdp-price-wrapper').style.display = 'none';
+  }
 
   // Update WhatsApp link with product name
   const waLink = document.querySelector('.btn-whatsapp');
@@ -39,7 +68,9 @@
   }
 
   // Key Specs Grid
-  const specsHTML = Object.entries(p.specs).map(([key, val]) => {
+  const specsHTML = Object.entries(p.specs)
+    .filter(([key]) => key !== 'price')
+    .map(([key, val]) => {
     const labels = {
       moq: 'MOQ', hsCode: 'HS Code', shelfLife: 'Shelf Life',
       origin: 'Origin', grade: 'Grade', loadPerContainer: 'Container Load'
