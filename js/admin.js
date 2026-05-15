@@ -1,5 +1,6 @@
 // ==================== ADMIN PANEL JS ====================
 var loginScreen = document.getElementById('login-screen');
+var loginWrapper = document.getElementById('login-wrapper');
 var dashboard = document.getElementById('dashboard');
 var loginForm = document.getElementById('login-form');
 var loginError = document.getElementById('login-error');
@@ -14,7 +15,7 @@ var pendingImageFile = null;
 async function init() {
     var session = await checkAuth();
     if (session) { showDashboard(); } 
-    else { loginScreen.style.display = 'block'; dashboard.style.display = 'none'; }
+    else { loginWrapper.style.display = 'flex'; dashboard.style.display = 'none'; }
 }
 
 loginForm.addEventListener('submit', async function(e) {
@@ -36,7 +37,7 @@ document.getElementById('logout-btn').addEventListener('click', async function()
 });
 
 async function showDashboard() {
-    loginScreen.style.display = 'none'; dashboard.style.display = 'block';
+    loginWrapper.style.display = 'none'; dashboard.style.display = 'flex';
     loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings(); loadWhatsAppSettings();
 }
 
