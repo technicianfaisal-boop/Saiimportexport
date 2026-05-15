@@ -50,8 +50,21 @@ async function loadHeroSection() {
   }
 }
 
+async function loadGeminiKey() {
+  if (typeof saiDB === 'undefined') return;
+  try {
+    const { data, error } = await saiDB.from('site_settings').select('value').eq('key', 'gemini').single();
+    if (!error && data && data.value && data.value.apikey) {
+      GEMINI_API_KEY = data.value.apikey;
+    }
+  } catch (err) {
+    console.warn("Could not load dynamic Gemini key", err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadHeroSection();
+  loadGeminiKey();
 });
 
 // ==================== RENDER PRODUCTS ====================
@@ -225,8 +238,8 @@ if (modal) {
 }
 
 // ==================== CHATBOT (GEMINI AI) ====================
-// ⚠️ CONFIGURE: For local testing, put your key here. For Vercel production, leave empty and use Vercel Env Vars.
-const GEMINI_API_KEY = 'AIzaSyDIBbkhQTK6R63Mhtu6oZDFOUTZ6gzEqOE';
+// Default fallback key (can be overridden by Supabase settings)
+let GEMINI_API_KEY = 'AIzaSyDIBbkhQTK6R63Mhtu6oZDFOUTZ6gzEqOE';
 
 let ALL_PRODUCTS_TEXT = "Products info will be loaded dynamically.";
 if (typeof PRODUCT_DETAILS !== 'undefined') {

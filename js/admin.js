@@ -38,7 +38,7 @@ document.getElementById('logout-btn').addEventListener('click', async function()
 
 async function showDashboard() {
     loginWrapper.style.display = 'none'; dashboard.style.display = 'flex';
-    loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings(); loadWhatsAppSettings();
+    loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings(); loadWhatsAppSettings(); loadGeminiSettings();
 }
 
 // ==================== TABS & SIDEBAR ====================
@@ -377,6 +377,20 @@ async function saveWhatsAppSettings() {
     };
     var r = await saiDB.from('site_settings').upsert({ key: 'whatsapp', value: data, updated_at: new Date().toISOString() });
     if (r.error) alert('Error: ' + r.error.message); else alert('✅ WhatsApp settings saved!');
+}
+
+// ==================== GEMINI SETTINGS ====================
+async function loadGeminiSettings() {
+    var r = await saiDB.from('site_settings').select('*').eq('key', 'gemini').single();
+    if (r.data && r.data.value) {
+        document.getElementById('gemini_apikey').value = r.data.value.apikey || '';
+    }
+}
+
+async function saveGeminiSettings() {
+    var data = { apikey: document.getElementById('gemini_apikey').value.trim() };
+    var r = await saiDB.from('site_settings').upsert({ key: 'gemini', value: data, updated_at: new Date().toISOString() });
+    if (r.error) alert('Error: ' + r.error.message); else alert('✅ Gemini AI Chatbot settings saved!');
 }
 
 // Hero image upload

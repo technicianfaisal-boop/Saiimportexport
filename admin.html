@@ -290,6 +290,17 @@
                         </p>
                         <button class="btn-cta btn-full mt-12" onclick="saveWhatsAppSettings()">💾 Save WhatsApp Settings</button>
                     </div>
+
+                    <!-- Gemini AI Settings -->
+                    <div class="setting-card">
+                        <h3>🤖 AI Chatbot Settings</h3>
+                        <p class="settings-hint">Configure your Gemini API key to power the AI sales assistant.</p>
+                        <label>Gemini API Key</label>
+                        <input type="password" id="gemini_apikey" placeholder="AIzaSy... (Keep this secret)">
+                        <p class="settings-hint-sm">
+                            <strong>Note:</strong> You can get a free API key from Google AI Studio. This key will be loaded dynamically by the website.
+                        </p>
+                        <button class="btn-cta btn-full mt-12" onclick="saveGeminiSettings()">💾 Save Chatbot Settings</button>
                     </div>
                 </div>
             </div>
