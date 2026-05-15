@@ -9,124 +9,124 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    
-    <!-- Supabase CDN is loaded before admin scripts at bottom of body -->
-    
     <style>
         * { box-sizing: border-box; }
-        body { background: #f4f6f4; }
-        .admin-container { max-width: 1200px; margin: 20px auto; padding: 10px; }
-        
-        /* Login Screen */
-        #login-screen { max-width: 400px; margin: 60px auto; background: white; padding: 30px 20px; border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        #login-screen h2 { text-align: center; margin-bottom: 16px; color: var(--green-dark); font-size: 1.4rem; }
+        body { background: #f4f6f4; font-family: 'Inter', sans-serif; }
+        .admin-container { max-width: 1200px; margin: 0 auto; padding: 10px; }
+
+        /* Login */
+        #login-screen { max-width: 380px; margin: 80px auto; background: white; padding: 30px 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        #login-screen h2 { text-align: center; margin-bottom: 16px; color: #2d5a3c; font-size: 1.3rem; }
         .error-msg { color: #dc3545; font-size: 0.8rem; margin-top: 8px; display: none; }
-        
+
         /* Dashboard */
         #dashboard { display: none; }
-        .admin-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 15px; background: white; padding: 12px 15px; border-radius: var(--radius-lg); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .admin-header h1 { margin: 0; color: var(--green-dark); font-size: 1.2rem; }
-        .admin-header-actions { display: flex; gap: 8px; }
-        .admin-header-actions .btn-cta,
-        .admin-header-actions .btn-outline-dark { font-size: 0.75rem; padding: 6px 12px; }
-        
-        /* Product Table */
-        .table-wrapper { background: white; border-radius: var(--radius-lg); box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .admin-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; background: white; padding: 10px 14px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .admin-header h1 { margin: 0; color: #2d5a3c; font-size: 1.1rem; }
+        .admin-header-actions { display: flex; gap: 6px; }
+
+        /* Tabs */
+        .admin-tabs { display: flex; gap: 4px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+        .admin-tabs button { padding: 8px 14px; border: none; background: white; color: #666; font-size: 0.75rem; font-weight: 600; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .admin-tabs button.active { background: #2d5a3c; color: white; }
+        .admin-tabs button:hover:not(.active) { background: #e8f0ea; }
+        .tab-badge { background: #e74c3c; color: white; font-size: 0.6rem; padding: 1px 5px; border-radius: 10px; margin-left: 4px; }
+
+        /* Tab panels */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Table styles */
+        .table-wrapper { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.78rem; }
-        th { background: var(--green-light); color: var(--green-dark); font-weight: 600; white-space: nowrap; }
-        td { color: var(--text-dark); }
+        th, td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.78rem; }
+        th { background: #e8f0ea; color: #2d5a3c; font-weight: 600; white-space: nowrap; }
         td img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
-        .actions { display: flex; gap: 5px; }
-        .btn-edit, .btn-delete { border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: 600; }
-        .btn-edit { background: var(--orange); color: white; }
+        .actions { display: flex; gap: 4px; }
+        .btn-sm { border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.68rem; font-weight: 600; }
+        .btn-edit { background: #c87533; color: white; }
         .btn-delete { background: #dc3545; color: white; }
-        .product-tag { font-size: 0.7rem; padding: 2px 6px; }
-        
+        .btn-view { background: #3498db; color: white; }
+        .btn-reply { background: #27ae60; color: white; }
+
+        /* Status badges */
+        .badge { font-size: 0.65rem; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+        .badge-new { background: #ffeaa7; color: #856404; }
+        .badge-read { background: #d4edda; color: #155724; }
+        .badge-replied { background: #cce5ff; color: #004085; }
+        .badge-draft { background: #f8d7da; color: #721c24; }
+        .badge-published { background: #d4edda; color: #155724; }
+
+        /* Card grid */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .setting-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .setting-card h3 { margin: 0 0 10px; font-size: 0.9rem; color: #2d5a3c; }
+        .setting-card label { font-size: 0.75rem; color: #666; font-weight: 600; display: block; margin-bottom: 3px; margin-top: 8px; }
+        .setting-card input, .setting-card textarea { width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.8rem; font-family: inherit; }
+        .setting-card textarea { resize: vertical; min-height: 60px; }
+
+        /* PDF button */
+        .btn-pdf { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+
         /* Modal */
-        #product-modal { display: none; }
-        .modal-overlay { padding: 10px; }
-        .modal-content { max-width: 600px; width: 100%; margin: 10px auto; max-height: 95vh; border-radius: 12px; }
-        .modal-body { text-align: left; max-height: 75vh; overflow-y: auto; padding: 0 5px 5px; }
-        .modal-body .form-group { margin-bottom: 10px; }
-        .modal-body label { font-size: 0.8rem; margin-bottom: 3px; }
-        .modal-body .form-control { font-size: 0.85rem; padding: 8px 10px; }
-        .modal-body textarea.form-control { font-size: 0.8rem; }
-        .modal-title { margin-bottom: 12px; font-size: 1.2rem; }
-        .specs-header { margin: 12px 0 6px; border-bottom: 1px solid #ddd; padding-bottom: 4px; font-size: 0.95rem; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 10px; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 550px; max-height: 92vh; overflow-y: auto; position: relative; }
+        .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
+        .modal-title { font-size: 1.1rem; color: #2d5a3c; margin-bottom: 12px; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: #444; margin-bottom: 3px; }
+        .form-control { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
         .form-row { display: flex; gap: 10px; }
         .form-row .form-group { flex: 1; min-width: 0; }
-        
-        /* Utils */
-        .text-center { text-align: center; }
-        .mt-15 { margin-top: 10px; }
+        .btn-cta { background: #2d5a3c; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .btn-cta:hover { background: #1e3d28; }
+        .btn-outline-dark { background: transparent; border: 1px solid #2d5a3c; color: #2d5a3c; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.78rem; font-weight: 600; }
+        .btn-full { width: 100%; }
 
-        /* ========== MOBILE (< 600px) ========== */
+        /* Image upload */
+        #img-upload-area { margin-top: 8px; border: 2px dashed #4a7c59; border-radius: 10px; padding: 18px; text-align: center; cursor: pointer; background: #f0f7f2; transition: all 0.2s; }
+        #img-upload-area p { margin: 4px 0 0; font-size: 0.78rem; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state svg { opacity: 0.3; margin-bottom: 10px; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* Mobile */
         @media (max-width: 600px) {
-            .admin-container { margin: 8px auto; padding: 6px; }
-            
-            /* Login */
-            #login-screen { margin: 30px 10px; padding: 20px 15px; }
-            #login-screen h2 { font-size: 1.2rem; }
-            
-            /* Header */
-            .admin-header { flex-direction: column; align-items: stretch; padding: 10px 12px; gap: 8px; }
-            .admin-header h1 { font-size: 1rem; text-align: center; }
+            .admin-container { padding: 6px; }
+            .admin-header { flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 10px; }
+            .admin-header h1 { font-size: 0.95rem; text-align: center; }
             .admin-header-actions { justify-content: center; }
-            .admin-header-actions .btn-cta,
-            .admin-header-actions .btn-outline-dark { flex: 1; text-align: center; font-size: 0.72rem; padding: 7px 8px; }
-            
-            /* Table → Card layout on mobile */
-            .table-wrapper { overflow: visible; }
+            .admin-tabs { gap: 3px; }
+            .admin-tabs button { padding: 7px 10px; font-size: 0.68rem; }
             table, thead, tbody, th, td, tr { display: block; }
             thead { display: none; }
-            tr { background: white; margin-bottom: 8px; border-radius: 10px; padding: 10px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #eee; position: relative; }
-            td { padding: 3px 0; border: none; display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
-            td:before { font-weight: 600; color: var(--green-dark); min-width: 60px; font-size: 0.7rem; }
-            td:nth-child(1):before { content: ""; }
-            td:nth-child(2):before { content: "ID:"; }
-            td:nth-child(3):before { content: "Name:"; }
-            td:nth-child(4):before { content: "Tag:"; }
-            td:nth-child(5):before { content: "Price:"; }
-            td:nth-child(6):before { content: ""; }
-            td:nth-child(1) { justify-content: center; }
-            td img { width: 50px; height: 50px; }
-            td:last-child { justify-content: center; padding-top: 6px; }
-            .actions { justify-content: center; width: 100%; }
-            .btn-edit, .btn-delete { flex: 1; text-align: center; padding: 6px; font-size: 0.72rem; }
-            
-            /* Modal fullscreen on mobile */
-            .modal-overlay { padding: 0; align-items: flex-start; }
-            .modal-content { max-width: 100%; margin: 0; border-radius: 0 0 12px 12px; max-height: 100vh; }
-            .modal-body { max-height: 82vh; padding: 0 2px; }
-            .modal-body .form-group { margin-bottom: 8px; }
-            .modal-body label { font-size: 0.75rem; }
-            .modal-body .form-control { font-size: 0.8rem; padding: 7px 8px; }
+            tr { background: white; margin-bottom: 6px; border-radius: 8px; padding: 8px 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee; }
+            td { padding: 2px 0; border: none; display: flex; align-items: center; gap: 5px; font-size: 0.75rem; }
+            td:before { font-weight: 600; color: #2d5a3c; min-width: 55px; font-size: 0.68rem; }
+            .modal-content { max-width: 100%; margin: 0; border-radius: 0 0 12px 12px; }
             .form-row { flex-direction: column; gap: 0; }
-            .specs-header { font-size: 0.85rem; }
-            
-            /* Image upload area compact */
-            #img-upload-area { padding: 15px 10px; }
-            #img-upload-area svg { width: 28px; height: 28px; }
-            #img-upload-area p { font-size: 0.75rem !important; }
+            .card-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 
 <body>
     <div class="admin-container">
-        
-        <!-- LOGIN SCREEN -->
+
+        <!-- LOGIN -->
         <div id="login-screen">
-            <h2>Admin Login</h2>
+            <h2>🌾 Admin Login</h2>
             <form id="login-form">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" class="form-control" required title="Email Address" placeholder="admin@example.com">
+                    <input type="email" id="email" name="email" class="form-control" required placeholder="admin@example.com">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" required title="Password" placeholder="Enter password">
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="Enter password">
                 </div>
                 <button type="submit" class="btn-cta btn-full" id="login-btn">Log In</button>
                 <div id="login-error" class="error-msg">Invalid login credentials.</div>
@@ -136,105 +136,151 @@
         <!-- DASHBOARD -->
         <div id="dashboard">
             <div class="admin-header">
-                <h1>Rice Catalog Manager</h1>
+                <h1>🌾 SAI Admin Panel</h1>
                 <div class="admin-header-actions">
-                    <button class="btn-cta" onclick="openModal()">+ Add Product</button>
+                    <button class="btn-pdf" onclick="generatePDF()">📄 PDF Catalog</button>
                     <button class="btn-outline-dark" id="logout-btn">Log Out</button>
                 </div>
             </div>
 
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>ID / Key</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="product-table-body">
-                        <!-- Products loaded here -->
-                        <tr><td colspan="5" class="text-center">Loading products...</td></tr>
-                    </tbody>
-                </table>
+            <!-- TABS -->
+            <div class="admin-tabs">
+                <button class="active" onclick="switchTab('products')">📦 Products</button>
+                <button onclick="switchTab('enquiries')">📩 Enquiries <span id="enquiry-badge" class="tab-badge" style="display:none">0</span></button>
+                <button onclick="switchTab('blog')">📝 Blog</button>
+                <button onclick="switchTab('hero')">🎨 Hero/Banner</button>
+            </div>
+
+            <!-- TAB: PRODUCTS -->
+            <div id="tab-products" class="tab-panel active">
+                <div style="margin-bottom:10px;text-align:right;">
+                    <button class="btn-cta" onclick="openProductModal()">+ Add Product</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Img</th><th>ID</th><th>Name</th><th>Tag</th><th>Price</th><th>Actions</th></tr></thead>
+                        <tbody id="product-table-body"><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: ENQUIRIES -->
+            <div id="tab-enquiries" class="tab-panel">
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="enquiry-table-body"><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: BLOG -->
+            <div id="tab-blog" class="tab-panel">
+                <div style="margin-bottom:10px;text-align:right;">
+                    <button class="btn-cta" onclick="openBlogModal()">+ New Post</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Title</th><th>Slug</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                        <tbody id="blog-table-body"><tr><td colspan="5" style="text-align:center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: HERO/BANNER -->
+            <div id="tab-hero" class="tab-panel">
+                <div class="card-grid">
+                    <div class="setting-card">
+                        <h3>🏠 Hero Section</h3>
+                        <label>Tagline</label>
+                        <input type="text" id="hero_tagline" placeholder="e.g. Premium Quality">
+                        <label>Heading</label>
+                        <input type="text" id="hero_heading" placeholder="Main heading">
+                        <label>Subheading</label>
+                        <textarea id="hero_subheading" rows="2" placeholder="Description text"></textarea>
+                        <label>Button Text</label>
+                        <input type="text" id="hero_cta_text" placeholder="e.g. Explore Our Products">
+                        <label>Button Link</label>
+                        <input type="text" id="hero_cta_link" placeholder="e.g. #products">
+                        <button class="btn-cta btn-full" style="margin-top:12px" onclick="saveHeroSettings()">💾 Save Hero Settings</button>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 
     <!-- PRODUCT MODAL -->
     <div class="modal-overlay" id="product-modal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">×</button>
-            <h3 id="modal-title" class="modal-title">Add New Product</h3>
-            <div class="modal-body">
-                <form id="product-form">
-                    <input type="hidden" id="edit-id">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="p_id">Product ID (e.g. 1121_sella)</label>
-                            <input type="text" id="p_id" class="form-control" required>
+            <button class="modal-close" onclick="closeProductModal()">×</button>
+            <h3 class="modal-title" id="product-modal-title">Add New Product</h3>
+            <form id="product-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-row">
+                    <div class="form-group"><label>Product ID</label><input type="text" id="p_id" class="form-control" required placeholder="e.g. 1121-basmati"></div>
+                    <div class="form-group"><label>Name</label><input type="text" id="p_name" class="form-control" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Category Tag</label><input type="text" id="p_tag" class="form-control" placeholder="e.g. Basmati Rice" required></div>
+                    <div class="form-group"><label>Price</label><input type="text" id="p_price" class="form-control" placeholder="e.g. $0.85 / kg"></div>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="text" id="p_img" class="form-control" placeholder="Auto-filled on upload or enter URL" required>
+                    <div id="img-upload-area">
+                        <div id="img-upload-prompt">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            <p style="color:#4a7c59;font-weight:600;">Click or drag image here</p>
+                            <p style="color:#888;font-size:0.72rem;">Auto-compressed to WebP</p>
                         </div>
-                        <div class="form-group">
-                            <label for="p_name">Name (e.g. 1121 Basmati Sella)</label>
-                            <input type="text" id="p_name" class="form-control" required>
+                        <div id="img-preview-box" style="display:none;">
+                            <img id="img-preview" style="max-width:160px;max-height:120px;border-radius:8px;">
+                            <p id="img-size-info" style="color:#4a7c59;font-size:0.78rem;font-weight:600;margin:4px 0"></p>
+                            <button type="button" onclick="clearImageUpload()" style="background:#e74c3c;color:#fff;border:none;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;">✕ Remove</button>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="p_tag">Category Tag</label>
-                            <input type="text" id="p_tag" class="form-control" placeholder="e.g. Basmati Rice" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="p_price">Price (e.g. $0.85 / kg)</label>
-                            <input type="text" id="p_price" class="form-control" placeholder="e.g. $0.85 / kg">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Product Image</label>
-                        <input type="text" id="p_img" class="form-control" placeholder="Auto-filled on upload or enter URL" required>
-                        <div id="img-upload-area" style="margin-top:10px;border:2px dashed #4a7c59;border-radius:12px;padding:25px;text-align:center;cursor:pointer;background:#f0f7f2;transition:all 0.3s ease;">
-                            <div id="img-upload-prompt">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a7c59" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                                <p style="margin:8px 0 0;color:#4a7c59;font-weight:600;">Click or drag image here</p>
-                                <p style="margin:4px 0 0;color:#888;font-size:0.8rem;">Auto-compressed to WebP • Max 400px width</p>
-                            </div>
-                            <div id="img-preview-box" style="display:none;">
-                                <img id="img-preview" style="max-width:200px;max-height:150px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-                                <p id="img-size-info" style="margin:8px 0 0;color:#4a7c59;font-size:0.85rem;font-weight:600;"></p>
-                                <button type="button" onclick="clearImageUpload()" style="margin-top:6px;background:#e74c3c;color:#fff;border:none;padding:4px 14px;border-radius:6px;cursor:pointer;font-size:0.8rem;">✕ Remove</button>
-                            </div>
-                        </div>
-                        <input type="file" id="img-file-input" accept="image/*" style="display:none;">
-                    </div>
-                    <div class="form-group">
-                        <label for="p_short_desc">Short Description</label>
-                        <input type="text" id="p_short_desc" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Detailed Description</label>
-                        <textarea id="p_desc" class="form-control" rows="3" required></textarea>
-                    </div>
-                    
-                    <h4 class="specs-header">Specifications (JSON Format)</h4>
-                    <div class="form-group">
-                        <label>Specs Data (Ensure valid JSON)</label>
-                        <textarea id="p_specs" class="form-control" rows="4" placeholder='{"AGL": "8.30 mm", "Moisture": "12% Max"}' required></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-cta btn-full mt-15" id="save-btn">Save Product</button>
-                </form>
-            </div>
+                    <input type="file" id="img-file-input" accept="image/*" style="display:none;">
+                </div>
+                <div class="form-group"><label>Short Description</label><input type="text" id="p_short_desc" class="form-control" required></div>
+                <div class="form-group"><label>Description</label><textarea id="p_desc" class="form-control" rows="2" required></textarea></div>
+                <div class="form-group"><label>Specs (JSON)</label><textarea id="p_specs" class="form-control" rows="3" placeholder='{"AGL":"8.30mm","Moisture":"12% Max"}' required></textarea></div>
+                <button type="submit" class="btn-cta btn-full" id="save-btn">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BLOG MODAL -->
+    <div class="modal-overlay" id="blog-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBlogModal()">×</button>
+            <h3 class="modal-title" id="blog-modal-title">New Blog Post</h3>
+            <form id="blog-form">
+                <input type="hidden" id="blog-edit-id">
+                <div class="form-group"><label>Title</label><input type="text" id="blog_title" class="form-control" required></div>
+                <div class="form-group"><label>Slug (URL-friendly)</label><input type="text" id="blog_slug" class="form-control" required placeholder="e.g. why-indian-basmati"></div>
+                <div class="form-group"><label>Cover Image URL</label><input type="text" id="blog_cover" class="form-control" placeholder="https://..."></div>
+                <div class="form-group"><label>Excerpt</label><textarea id="blog_excerpt" class="form-control" rows="2" placeholder="Short summary for listing page"></textarea></div>
+                <div class="form-group"><label>Content (HTML)</label><textarea id="blog_content" class="form-control" rows="6" required placeholder="Full blog post content..."></textarea></div>
+                <div class="form-group">
+                    <label><input type="checkbox" id="blog_published"> Publish immediately</label>
+                </div>
+                <button type="submit" class="btn-cta btn-full" id="blog-save-btn">Save Post</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ENQUIRY VIEW MODAL -->
+    <div class="modal-overlay" id="enquiry-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEnquiryModal()">×</button>
+            <h3 class="modal-title">📩 Enquiry Details</h3>
+            <div id="enquiry-detail"></div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialize Supabase Client - defined here to avoid variable shadowing
         var saiDB = window.supabase.createClient(
             'https://zztjtewhxpckqgmqimtq.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6dGp0ZXdoeHBja3FnbXFpbXRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTU1OTksImV4cCI6MjA5NDQzMTU5OX0.PjvLvaqncoiyiB4m0lNenaCpjp6shml1-dx4vcGlGO4'
@@ -244,6 +290,6 @@
             return r.data.session;
         }
     </script>
-    <script src="js/admin.js?v=6"></script>
+    <script src="js/admin.js?v=8"></script>
 </body>
 </html>

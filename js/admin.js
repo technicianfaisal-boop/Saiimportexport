@@ -1,257 +1,148 @@
-// Admin Panel Logic
+// ==================== ADMIN PANEL JS ====================
+var loginScreen = document.getElementById('login-screen');
+var dashboard = document.getElementById('dashboard');
+var loginForm = document.getElementById('login-form');
+var loginError = document.getElementById('login-error');
+var productForm = document.getElementById('product-form');
+var blogForm = document.getElementById('blog-form');
+var currentProducts = [];
+var currentEnquiries = [];
+var currentPosts = [];
+var pendingImageFile = null;
 
-const loginScreen = document.getElementById('login-screen');
-const dashboard = document.getElementById('dashboard');
-const loginForm = document.getElementById('login-form');
-const loginError = document.getElementById('login-error');
-const productModal = document.getElementById('product-modal');
-const productForm = document.getElementById('product-form');
-const tableBody = document.getElementById('product-table-body');
-
-let currentProducts = [];
-
-// Initialize
+// ==================== AUTH ====================
 async function init() {
-    const session = await checkAuth();
-    if (session) {
-        showDashboard();
-    } else {
-        loginScreen.style.display = 'block';
-        dashboard.style.display = 'none';
-    }
+    var session = await checkAuth();
+    if (session) { showDashboard(); } 
+    else { loginScreen.style.display = 'block'; dashboard.style.display = 'none'; }
 }
 
-// Login
-loginForm.addEventListener('submit', async (e) => {
+loginForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const btn = document.getElementById('login-btn');
-    
+    var btn = document.getElementById('login-btn');
     btn.innerText = 'Logging in...';
-    
     try {
-        // Check supabase is initialized
-        if (typeof saiDB === 'undefined') {
-            alert('ERROR: Supabase client not initialized. Check console.');
-            btn.innerText = 'Log In';
-            return;
-        }
-
-        const { data, error } = await saiDB.auth.signInWithPassword({
-            email: email,
-            password: password,
+        var r = await saiDB.auth.signInWithPassword({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
         });
-        
-        if (error) {
-            loginError.style.display = 'block';
-            loginError.innerText = '❌ ' + error.message;
-            loginError.style.color = 'red';
-            loginError.style.fontSize = '1rem';
-            loginError.style.padding = '10px';
-            btn.innerText = 'Log In';
-        } else {
-            loginError.style.display = 'none';
-            showDashboard();
-        }
-    } catch (err) {
-        alert('JS Error: ' + err.message);
-        btn.innerText = 'Log In';
-    }
+        if (r.error) { loginError.style.display = 'block'; loginError.innerText = '❌ ' + r.error.message; btn.innerText = 'Log In'; }
+        else { loginError.style.display = 'none'; showDashboard(); }
+    } catch(err) { alert('Error: ' + err.message); btn.innerText = 'Log In'; }
 });
 
-// Logout
-document.getElementById('logout-btn').addEventListener('click', async () => {
-    await saiDB.auth.signOut();
-    window.location.reload();
+document.getElementById('logout-btn').addEventListener('click', async function() {
+    await saiDB.auth.signOut(); window.location.reload();
 });
 
-// Show Dashboard & Load Data
 async function showDashboard() {
-    loginScreen.style.display = 'none';
-    dashboard.style.display = 'block';
-    await loadProducts();
+    loginScreen.style.display = 'none'; dashboard.style.display = 'block';
+    loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings();
 }
 
+// ==================== TABS ====================
+function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.admin-tabs button').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.closest('button').classList.add('active');
+}
+
+// ==================== PRODUCTS ====================
 async function loadProducts() {
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Loading...</td></tr>';
-    
-    // Fetch from Supabase
-    const { data, error } = await saiDB
-        .from('products')
-        .select('*')
-        .order('id', { ascending: true });
-        
-    if (error) {
-        tableBody.innerHTML = `<tr><td colspan="5" style="color:red; text-align: center;">Error loading data: ${error.message}. <br>Make sure you have created the 'products' table in saiDB.</td></tr>`;
-        return;
-    }
-    
-    currentProducts = data;
-    renderTable();
+    var tbody = document.getElementById('product-table-body');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Loading...</td></tr>';
+    var r = await saiDB.from('products').select('*').order('id');
+    if (r.error) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red">Error: '+r.error.message+'</td></tr>'; return; }
+    currentProducts = r.data;
+    if (!currentProducts.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No products. Add one!</td></tr>'; return; }
+    tbody.innerHTML = currentProducts.map(function(p) {
+        return '<tr><td><img src="'+p.img+'" alt="'+p.name+'"></td><td>'+p.id+'</td><td><strong>'+p.name+'</strong></td><td><span class="badge badge-published">'+p.tag+'</span></td><td>'+(p.specs&&p.specs.price||'N/A')+'</td><td><div class="actions"><button class="btn-sm btn-edit" onclick="editProduct(\''+p.id+'\')">Edit</button><button class="btn-sm btn-delete" onclick="deleteProduct(\''+p.id+'\')">Del</button></div></td></tr>';
+    }).join('');
 }
 
-function renderTable() {
-    if (currentProducts.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No products found. Add one!</td></tr>';
-        return;
-    }
-    
-    tableBody.innerHTML = currentProducts.map(p => `
-        <tr>
-            <td><img src="${p.img}" alt="${p.name}"></td>
-            <td><strong>${p.id}</strong></td>
-            <td>${p.name}</td>
-            <td><span class="product-tag">${p.tag}</span></td>
-            <td><strong>${p.specs?.price || 'N/A'}</strong></td>
-            <td>
-                <div class="actions">
-                    <button class="btn-edit" onclick="editProduct('${p.id}')">Edit</button>
-                    <button class="btn-delete" onclick="deleteProduct('${p.id}')">Delete</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+function openProductModal(isEdit) {
+    document.getElementById('product-modal').classList.add('active');
+    if (!isEdit) { document.getElementById('product-modal-title').innerText = 'Add New Product'; productForm.reset(); document.getElementById('edit-id').value = ''; document.getElementById('p_id').readOnly = false; clearImageUpload(); }
 }
-
-// Modal Logic
-function openModal(isEdit = false) {
-    productModal.style.display = 'flex';
-    setTimeout(() => productModal.classList.add('active'), 10);
-    if (!isEdit) {
-        document.getElementById('modal-title').innerText = 'Add New Product';
-        productForm.reset();
-        document.getElementById('edit-id').value = '';
-        document.getElementById('p_id').readOnly = false;
-    }
-}
-
-function closeModal() {
-    productModal.classList.remove('active');
-    setTimeout(() => productModal.style.display = 'none', 300);
-}
+function closeProductModal() { document.getElementById('product-modal').classList.remove('active'); }
 
 function editProduct(id) {
-    const p = currentProducts.find(x => x.id === id);
+    var p = currentProducts.find(function(x) { return x.id === id; });
     if (!p) return;
-    
-    document.getElementById('modal-title').innerText = 'Edit Product';
+    document.getElementById('product-modal-title').innerText = 'Edit Product';
     document.getElementById('edit-id').value = p.id;
-    document.getElementById('p_id').value = p.id;
-    document.getElementById('p_id').readOnly = true; // Don't allow changing ID easily
+    document.getElementById('p_id').value = p.id; document.getElementById('p_id').readOnly = true;
     document.getElementById('p_name').value = p.name;
     document.getElementById('p_img').value = p.img;
     document.getElementById('p_tag').value = p.tag;
-    document.getElementById('p_price').value = p.specs?.price || '';
+    document.getElementById('p_price').value = p.specs&&p.specs.price||'';
     document.getElementById('p_short_desc').value = p.short_desc;
     document.getElementById('p_desc').value = p.description;
-    
-    // Convert specs JSON back to string
     document.getElementById('p_specs').value = JSON.stringify(p.specs, null, 2);
-    
-    openModal(true);
+    clearImageUpload();
+    openProductModal(true);
 }
 
-
-
-// Delete Product
 async function deleteProduct(id) {
-    if (!confirm(`Are you sure you want to delete ${id}?`)) return;
-    
-    const { error } = await saiDB
-        .from('products')
-        .delete()
-        .eq('id', id);
-        
-    if (error) {
-        alert(`Error deleting product: ${error.message}`);
-    } else {
-        loadProducts(); // Refresh
-    }
+    if (!confirm('Delete ' + id + '?')) return;
+    var r = await saiDB.from('products').delete().eq('id', id);
+    if (r.error) alert('Error: ' + r.error.message); else loadProducts();
 }
 
-// ==================== IMAGE UPLOAD SYSTEM ====================
-var pendingImageFile = null; // Holds compressed blob ready for upload
-
-// Click to upload
-document.getElementById('img-upload-area').addEventListener('click', function() {
-    document.getElementById('img-file-input').click();
-});
-
-// Drag and drop
-var uploadArea = document.getElementById('img-upload-area');
-uploadArea.addEventListener('dragover', function(e) {
+productForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    uploadArea.style.borderColor = '#2d5a3c';
-    uploadArea.style.background = '#ddf0e3';
-});
-uploadArea.addEventListener('dragleave', function() {
-    uploadArea.style.borderColor = '#4a7c59';
-    uploadArea.style.background = '#f0f7f2';
-});
-uploadArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    uploadArea.style.borderColor = '#4a7c59';
-    uploadArea.style.background = '#f0f7f2';
-    if (e.dataTransfer.files.length > 0) {
-        processImageFile(e.dataTransfer.files[0]);
+    var btn = document.getElementById('save-btn');
+    btn.innerText = 'Saving...';
+    if (pendingImageFile) {
+        btn.innerText = 'Uploading image...';
+        var url = await uploadImageToStorage(document.getElementById('p_id').value);
+        if (url) document.getElementById('p_img').value = url;
     }
+    var specs = {};
+    try { specs = JSON.parse(document.getElementById('p_specs').value); } catch(e) { alert('Invalid JSON!'); btn.innerText = 'Save Product'; return; }
+    var price = document.getElementById('p_price').value;
+    if (price) specs.price = price; else delete specs.price;
+    var r = await saiDB.from('products').upsert({
+        id: document.getElementById('p_id').value, name: document.getElementById('p_name').value,
+        tag: document.getElementById('p_tag').value, short_desc: document.getElementById('p_short_desc').value,
+        description: document.getElementById('p_desc').value, img: document.getElementById('p_img').value, specs: specs
+    });
+    btn.innerText = 'Save Product';
+    if (r.error) alert('Error: ' + r.error.message); else { pendingImageFile = null; closeProductModal(); loadProducts(); }
 });
 
-// File input change
-document.getElementById('img-file-input').addEventListener('change', function(e) {
-    if (e.target.files.length > 0) {
-        processImageFile(e.target.files[0]);
-    }
-});
+// ==================== IMAGE UPLOAD ====================
+document.getElementById('img-upload-area').addEventListener('click', function() { document.getElementById('img-file-input').click(); });
+var ua = document.getElementById('img-upload-area');
+ua.addEventListener('dragover', function(e) { e.preventDefault(); ua.style.borderColor = '#2d5a3c'; ua.style.background = '#ddf0e3'; });
+ua.addEventListener('dragleave', function() { ua.style.borderColor = '#4a7c59'; ua.style.background = '#f0f7f2'; });
+ua.addEventListener('drop', function(e) { e.preventDefault(); ua.style.borderColor = '#4a7c59'; ua.style.background = '#f0f7f2'; if (e.dataTransfer.files.length) processImageFile(e.dataTransfer.files[0]); });
+document.getElementById('img-file-input').addEventListener('change', function(e) { if (e.target.files.length) processImageFile(e.target.files[0]); });
 
-// Compress image to WebP using Canvas API
-function compressImage(file, maxWidth, quality) {
-    return new Promise(function(resolve) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var img = new Image();
-            img.onload = function() {
-                var canvas = document.createElement('canvas');
-                var ratio = Math.min(maxWidth / img.width, 1);
-                canvas.width = img.width * ratio;
-                canvas.height = img.height * ratio;
-                var ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                canvas.toBlob(function(blob) {
-                    resolve(blob);
-                }, 'image/webp', quality);
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+function compressImage(file, maxW, q) {
+    return new Promise(function(res) {
+        var r = new FileReader(); r.onload = function(e) {
+            var img = new Image(); img.onload = function() {
+                var c = document.createElement('canvas'), ratio = Math.min(maxW/img.width,1);
+                c.width = img.width*ratio; c.height = img.height*ratio;
+                c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+                c.toBlob(function(b) { res(b); }, 'image/webp', q);
+            }; img.src = e.target.result;
+        }; r.readAsDataURL(file);
     });
 }
 
-// Process selected image
 async function processImageFile(file) {
-    if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
-        return;
-    }
-
-    var originalSize = (file.size / 1024).toFixed(1);
-    document.getElementById('img-size-info').innerText = 'Compressing...';
+    if (!file.type.startsWith('image/')) { alert('Select an image'); return; }
+    var orig = (file.size/1024).toFixed(1);
     document.getElementById('img-upload-prompt').style.display = 'none';
     document.getElementById('img-preview-box').style.display = 'block';
-
-    // Compress to WebP, max 400px width, 60% quality
-    var compressed = await compressImage(file, 400, 0.6);
-    var compressedSize = (compressed.size / 1024).toFixed(1);
-    var savings = Math.round((1 - compressed.size / file.size) * 100);
-
-    pendingImageFile = compressed;
-
-    // Show preview
-    var previewUrl = URL.createObjectURL(compressed);
-    document.getElementById('img-preview').src = previewUrl;
-    document.getElementById('img-size-info').innerText = 
-        originalSize + 'KB → ' + compressedSize + 'KB (' + savings + '% smaller) ✓ WebP';
+    document.getElementById('img-size-info').innerText = 'Compressing...';
+    var comp = await compressImage(file, 400, 0.6);
+    pendingImageFile = comp;
+    document.getElementById('img-preview').src = URL.createObjectURL(comp);
+    document.getElementById('img-size-info').innerText = orig + 'KB → ' + (comp.size/1024).toFixed(1) + 'KB ✓ WebP';
 }
 
 function clearImageUpload() {
@@ -259,89 +150,184 @@ function clearImageUpload() {
     document.getElementById('img-upload-prompt').style.display = 'block';
     document.getElementById('img-preview-box').style.display = 'none';
     document.getElementById('img-file-input').value = '';
-    document.getElementById('img-preview').src = '';
-    document.getElementById('img-size-info').innerText = '';
 }
 
-// Upload image to Supabase Storage
-async function uploadImageToStorage(productId) {
+async function uploadImageToStorage(pid) {
     if (!pendingImageFile) return null;
-    
-    var fileName = productId + '.webp';
-    var filePath = 'products/' + fileName;
-    
-    // Upload to Supabase Storage
-    var result = await saiDB.storage.from('product-images').upload(filePath, pendingImageFile, {
-        contentType: 'image/webp',
-        upsert: true
-    });
-    
-    if (result.error) {
-        console.error('Upload error:', result.error);
-        alert('Image upload failed: ' + result.error.message);
-        return null;
-    }
-    
-    // Get public URL
-    var urlResult = saiDB.storage.from('product-images').getPublicUrl(filePath);
-    return urlResult.data.publicUrl;
+    var path = 'products/' + pid + '.webp';
+    var r = await saiDB.storage.from('product-images').upload(path, pendingImageFile, { contentType: 'image/webp', upsert: true });
+    if (r.error) { alert('Upload failed: ' + r.error.message); return null; }
+    return saiDB.storage.from('product-images').getPublicUrl(path).data.publicUrl;
 }
 
-// ==================== MODIFIED SAVE (with image upload) ====================
-// Override the original form submit to include image upload
-productForm.removeEventListener('submit', productForm._handler);
-productForm.addEventListener('submit', async function(e) {
+// ==================== ENQUIRIES ====================
+async function loadEnquiries() {
+    var tbody = document.getElementById('enquiry-table-body');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Loading...</td></tr>';
+    var r = await saiDB.from('enquiries').select('*').order('created_at', { ascending: false });
+    if (r.error) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red">'+r.error.message+'</td></tr>'; return; }
+    currentEnquiries = r.data;
+    var newCount = currentEnquiries.filter(function(e) { return e.status === 'new'; }).length;
+    var badge = document.getElementById('enquiry-badge');
+    if (newCount > 0) { badge.style.display = 'inline'; badge.innerText = newCount; } else { badge.style.display = 'none'; }
+    if (!currentEnquiries.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No enquiries yet.</td></tr>'; return; }
+    tbody.innerHTML = currentEnquiries.map(function(e) {
+        var d = new Date(e.created_at).toLocaleDateString('en-IN', { day:'2-digit', month:'short' });
+        var badge = e.status === 'new' ? 'badge-new' : e.status === 'replied' ? 'badge-replied' : 'badge-read';
+        return '<tr><td>'+d+'</td><td>'+e.name+'</td><td style="font-size:0.72rem">'+e.email+'</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(e.products||'-')+'</td><td><span class="badge '+badge+'">'+e.status+'</span></td><td><div class="actions"><button class="btn-sm btn-view" onclick="viewEnquiry('+e.id+')">View</button><button class="btn-sm btn-delete" onclick="deleteEnquiry('+e.id+')">Del</button></div></td></tr>';
+    }).join('');
+}
+
+function viewEnquiry(id) {
+    var e = currentEnquiries.find(function(x) { return x.id === id; });
+    if (!e) return;
+    var d = new Date(e.created_at).toLocaleString('en-IN');
+    document.getElementById('enquiry-detail').innerHTML = 
+        '<div style="font-size:0.82rem;line-height:1.8"><p><strong>📅 Date:</strong> '+d+'</p><p><strong>👤 Name:</strong> '+e.name+'</p><p><strong>📧 Email:</strong> <a href="mailto:'+e.email+'">'+e.email+'</a></p><p><strong>📱 Phone:</strong> '+(e.phone||'N/A')+'</p><p><strong>🏢 Company:</strong> '+(e.company||'N/A')+'</p><p><strong>📦 Products:</strong> '+(e.products||'N/A')+'</p><p><strong>💬 Message:</strong></p><div style="background:#f9f9f9;padding:10px;border-radius:8px;margin-top:4px">'+(e.message||'No message')+'</div><div style="margin-top:12px;display:flex;gap:6px"><button class="btn-cta" onclick="markEnquiry('+e.id+',\'read\')">✓ Mark Read</button><button class="btn-sm btn-reply" style="padding:8px 14px" onclick="markEnquiry('+e.id+',\'replied\')">✉ Replied</button><a href="mailto:'+e.email+'?subject=Re: Enquiry from SAI Import Export Agro" class="btn-sm btn-view" style="padding:8px 14px;text-decoration:none">📧 Email</a></div></div>';
+    document.getElementById('enquiry-modal').classList.add('active');
+    if (e.status === 'new') markEnquiry(e.id, 'read');
+}
+
+function closeEnquiryModal() { document.getElementById('enquiry-modal').classList.remove('active'); }
+
+async function markEnquiry(id, status) {
+    await saiDB.from('enquiries').update({ status: status }).eq('id', id);
+    loadEnquiries();
+}
+
+async function deleteEnquiry(id) {
+    if (!confirm('Delete this enquiry?')) return;
+    await saiDB.from('enquiries').delete().eq('id', id);
+    loadEnquiries();
+}
+
+// ==================== BLOG ====================
+async function loadBlogPosts() {
+    var tbody = document.getElementById('blog-table-body');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Loading...</td></tr>';
+    var r = await saiDB.from('blog_posts').select('*').order('created_at', { ascending: false });
+    if (r.error) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red">'+r.error.message+'</td></tr>'; return; }
+    currentPosts = r.data;
+    if (!currentPosts.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No posts yet. Create one!</td></tr>'; return; }
+    tbody.innerHTML = currentPosts.map(function(p) {
+        var d = new Date(p.created_at).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+        var badge = p.published ? 'badge-published' : 'badge-draft';
+        var label = p.published ? 'Live' : 'Draft';
+        return '<tr><td><strong>'+p.title+'</strong></td><td style="font-size:0.72rem;color:#888">'+p.slug+'</td><td><span class="badge '+badge+'">'+label+'</span></td><td>'+d+'</td><td><div class="actions"><button class="btn-sm btn-edit" onclick="editBlog('+p.id+')">Edit</button><button class="btn-sm btn-delete" onclick="deleteBlog('+p.id+')">Del</button></div></td></tr>';
+    }).join('');
+}
+
+function openBlogModal(isEdit) {
+    document.getElementById('blog-modal').classList.add('active');
+    if (!isEdit) { document.getElementById('blog-modal-title').innerText = 'New Blog Post'; blogForm.reset(); document.getElementById('blog-edit-id').value = ''; }
+}
+function closeBlogModal() { document.getElementById('blog-modal').classList.remove('active'); }
+
+function editBlog(id) {
+    var p = currentPosts.find(function(x) { return x.id === id; });
+    if (!p) return;
+    document.getElementById('blog-modal-title').innerText = 'Edit Post';
+    document.getElementById('blog-edit-id').value = p.id;
+    document.getElementById('blog_title').value = p.title;
+    document.getElementById('blog_slug').value = p.slug;
+    document.getElementById('blog_cover').value = p.cover_img || '';
+    document.getElementById('blog_excerpt').value = p.excerpt || '';
+    document.getElementById('blog_content').value = p.content || '';
+    document.getElementById('blog_published').checked = p.published;
+    openBlogModal(true);
+}
+
+blogForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    var btn = document.getElementById('save-btn');
+    var btn = document.getElementById('blog-save-btn');
     btn.innerText = 'Saving...';
-    
-    // Upload image first if pending
-    if (pendingImageFile) {
-        var pid = document.getElementById('p_id').value;
-        btn.innerText = 'Uploading image...';
-        var imageUrl = await uploadImageToStorage(pid);
-        if (imageUrl) {
-            document.getElementById('p_img').value = imageUrl;
-        }
-    }
-
-    var specsData = {};
-    try {
-        specsData = JSON.parse(document.getElementById('p_specs').value);
-    } catch (err) {
-        alert("Invalid JSON format in Specifications!");
-        btn.innerText = 'Save Product';
-        return;
-    }
-
-    var priceVal = document.getElementById('p_price').value;
-    if (priceVal) {
-        specsData.price = priceVal;
-    } else {
-        delete specsData.price;
-    }
-
-    var productData = {
-        id: document.getElementById('p_id').value,
-        name: document.getElementById('p_name').value,
-        tag: document.getElementById('p_tag').value,
-        short_desc: document.getElementById('p_short_desc').value,
-        description: document.getElementById('p_desc').value,
-        img: document.getElementById('p_img').value,
-        specs: specsData
+    var editId = document.getElementById('blog-edit-id').value;
+    var data = {
+        title: document.getElementById('blog_title').value,
+        slug: document.getElementById('blog_slug').value,
+        cover_img: document.getElementById('blog_cover').value || null,
+        excerpt: document.getElementById('blog_excerpt').value || null,
+        content: document.getElementById('blog_content').value,
+        published: document.getElementById('blog_published').checked,
+        updated_at: new Date().toISOString()
     };
+    var r;
+    if (editId) { r = await saiDB.from('blog_posts').update(data).eq('id', parseInt(editId)); }
+    else { r = await saiDB.from('blog_posts').insert(data); }
+    btn.innerText = 'Save Post';
+    if (r.error) alert('Error: ' + r.error.message); else { closeBlogModal(); loadBlogPosts(); }
+});
 
-    var result = await saiDB.from('products').upsert(productData);
-    btn.innerText = 'Save Product';
+async function deleteBlog(id) {
+    if (!confirm('Delete this post?')) return;
+    await saiDB.from('blog_posts').delete().eq('id', id);
+    loadBlogPosts();
+}
 
-    if (result.error) {
-        alert('Error saving product: ' + result.error.message);
-    } else {
-        pendingImageFile = null;
-        closeModal();
-        loadProducts();
+// Auto-generate slug from title
+document.getElementById('blog_title').addEventListener('input', function() {
+    if (!document.getElementById('blog-edit-id').value) {
+        document.getElementById('blog_slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     }
 });
 
-// Boot up
+// ==================== HERO/BANNER SETTINGS ====================
+async function loadHeroSettings() {
+    var r = await saiDB.from('site_settings').select('*').eq('key', 'hero').single();
+    if (r.data && r.data.value) {
+        var v = r.data.value;
+        document.getElementById('hero_tagline').value = v.tagline || '';
+        document.getElementById('hero_heading').value = v.heading || '';
+        document.getElementById('hero_subheading').value = v.subheading || '';
+        document.getElementById('hero_cta_text').value = v.cta_text || '';
+        document.getElementById('hero_cta_link').value = v.cta_link || '';
+    }
+}
+
+async function saveHeroSettings() {
+    var data = {
+        tagline: document.getElementById('hero_tagline').value,
+        heading: document.getElementById('hero_heading').value,
+        subheading: document.getElementById('hero_subheading').value,
+        cta_text: document.getElementById('hero_cta_text').value,
+        cta_link: document.getElementById('hero_cta_link').value
+    };
+    var r = await saiDB.from('site_settings').upsert({ key: 'hero', value: data, updated_at: new Date().toISOString() });
+    if (r.error) alert('Error: ' + r.error.message); else alert('✅ Hero settings saved!');
+}
+
+// ==================== PDF CATALOG GENERATOR ====================
+async function generatePDF() {
+    if (!currentProducts.length) { alert('No products to generate catalog'); return; }
+    var w = window.open('', '_blank');
+    w.document.write('<html><head><title>SAI Import Export Agro - Product Catalog</title>');
+    w.document.write('<style>@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");');
+    w.document.write('*{margin:0;padding:0;box-sizing:border-box;font-family:"Inter",sans-serif}');
+    w.document.write('body{padding:20px;color:#333}');
+    w.document.write('.header{text-align:center;padding:30px 0;border-bottom:3px solid #2d5a3c;margin-bottom:30px}');
+    w.document.write('.header h1{color:#2d5a3c;font-size:28px;margin-bottom:5px}');
+    w.document.write('.header p{color:#666;font-size:14px}');
+    w.document.write('.product{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid #eee;page-break-inside:avoid}');
+    w.document.write('.product img{width:100px;height:100px;object-fit:cover;border-radius:10px}');
+    w.document.write('.product h3{color:#2d5a3c;font-size:16px;margin-bottom:4px}');
+    w.document.write('.product .tag{background:#e8f0ea;color:#2d5a3c;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}');
+    w.document.write('.product .price{color:#c87533;font-weight:700;font-size:15px;margin-top:4px}');
+    w.document.write('.product .desc{color:#666;font-size:12px;margin-top:4px}');
+    w.document.write('.specs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}');
+    w.document.write('.spec{background:#f5f5f5;padding:2px 8px;border-radius:6px;font-size:11px;color:#555}');
+    w.document.write('.footer{text-align:center;margin-top:30px;padding-top:15px;border-top:2px solid #2d5a3c;font-size:12px;color:#888}');
+    w.document.write('@media print{body{padding:10px}.product img{width:80px;height:80px}}</style></head><body>');
+    w.document.write('<div class="header"><h1>🌾 SAI Import Export Agro</h1><p>Premium Indian Rice Exporter | Product Catalog ' + new Date().getFullYear() + '</p><p style="margin-top:4px;font-size:12px">📧 admin@saiimportexportagro.com | 📱 +91 6386854875</p></div>');
+    currentProducts.forEach(function(p) {
+        var specsHtml = '';
+        if (p.specs) { Object.keys(p.specs).forEach(function(k) { if (k !== 'price') specsHtml += '<span class="spec"><strong>'+k+':</strong> '+p.specs[k]+'</span>'; }); }
+        w.document.write('<div class="product"><img src="'+p.img+'" alt="'+p.name+'"><div><span class="tag">'+p.tag+'</span><h3>'+p.name+'</h3><div class="price">'+(p.specs&&p.specs.price||'Contact for Price')+'</div><p class="desc">'+(p.short_desc||p.description||'')+'</p><div class="specs">'+specsHtml+'</div></div></div>');
+    });
+    w.document.write('<div class="footer"><p>© ' + new Date().getFullYear() + ' SAI Import Export Agro. All rights reserved. | saiimportexport.vercel.app</p></div>');
+    w.document.write('</body></html>');
+    w.document.close();
+    setTimeout(function() { w.print(); }, 500);
+}
+
+// ==================== BOOT ====================
 document.addEventListener('DOMContentLoaded', init);
