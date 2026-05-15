@@ -53,6 +53,7 @@ async function loadHeroSection() {
 document.addEventListener('DOMContentLoaded', () => {
   loadHeroSection();
   buildProductInterestCheckboxes();
+  buildFooterProducts();
 });
 
 // Dynamically build Product Interest checkboxes from PRODUCT_DETAILS
@@ -97,6 +98,37 @@ function buildProductInterestCheckboxes() {
     container.appendChild(moreGrid);
   } else {
     container.appendChild(mainGrid);
+  }
+}
+
+// Dynamically build footer product quick links from PRODUCT_DETAILS
+function buildFooterProducts() {
+  const footerList = document.getElementById('footer-products-list');
+  if (!footerList || typeof PRODUCT_DETAILS === 'undefined') return;
+
+  const allProducts = Object.entries(PRODUCT_DETAILS);
+  const FOOTER_VISIBLE = 5;
+
+  allProducts.slice(0, FOOTER_VISIBLE).forEach(([id, p]) => {
+    footerList.innerHTML += `<li><a href="product.html?id=${id}">${p.name}</a></li>`;
+  });
+
+  if (allProducts.length > FOOTER_VISIBLE) {
+    const moreLi = document.createElement('li');
+    const moreLink = document.createElement('a');
+    moreLink.href = '#';
+    moreLink.textContent = '+ More...';
+    moreLink.style.cssText = 'color:var(--orange); font-weight:600;';
+    moreLi.appendChild(moreLink);
+    footerList.appendChild(moreLi);
+
+    moreLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      moreLi.remove();
+      allProducts.slice(FOOTER_VISIBLE).forEach(([id, p]) => {
+        footerList.innerHTML += `<li><a href="product.html?id=${id}">${p.name}</a></li>`;
+      });
+    });
   }
 }
 
