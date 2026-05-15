@@ -47,6 +47,9 @@ async function loadHeroSection() {
     }
   } catch (e) {
     console.warn("Failed to load hero from Supabase, using local fallback.", e);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadHeroSection();
 });
