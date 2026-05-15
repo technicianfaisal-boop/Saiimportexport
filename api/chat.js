@@ -4,19 +4,40 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // Get the Gemini API Key from Vercel Environment Variables
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Supabase Configuration
+  const SUPABASE_URL = 'https://zztjtewhxpckqgmqimtq.supabase.co';
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
-  if (!apiKey) {
-    console.error('Missing GEMINI_API_KEY environment variable');
-    return res.status(500).json({ error: 'Server configuration error: API key missing' });
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
+    return res.status(500).json({ error: 'Server configuration error: Database access key missing' });
   }
 
   try {
+    // 1. Fetch Gemini API Key securely from Supabase
+    const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/site_settings?key=eq.gemini&select=value`, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!dbRes.ok) {
+      throw new Error(`Failed to fetch settings from Supabase: ${dbRes.status}`);
+    }
+
+    const settingsData = await dbRes.json();
+    if (!settingsData || settingsData.length === 0 || !settingsData[0].value || !settingsData[0].value.apikey) {
+      return res.status(500).json({ error: 'Gemini API key is not configured in the Admin Panel.' });
+    }
+
+    const apiKey = settingsData[0].value.apikey;
     const { system_instruction, contents } = req.body;
 
-    // Call the Google Gemini API securely from the backend
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`, {
+    // 2. Call the Google Gemini API securely from the backend
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -30,8 +51,8 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
-    return res.status(response.status).json(data);
+    const data = await geminiRes.json();
+    return res.status(geminiRes.status).json(data);
 
   } catch (error) {
     console.error('Chat API Error:', error);

@@ -47,24 +47,8 @@ async function loadHeroSection() {
     }
   } catch (e) {
     console.warn("Failed to load hero from Supabase, using local fallback.", e);
-  }
-}
-
-async function loadGeminiKey() {
-  if (typeof saiDB === 'undefined') return;
-  try {
-    const { data, error } = await saiDB.from('site_settings').select('value').eq('key', 'gemini').single();
-    if (!error && data && data.value && data.value.apikey) {
-      GEMINI_API_KEY = data.value.apikey;
-    }
-  } catch (err) {
-    console.warn("Could not load dynamic Gemini key", err);
-  }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   loadHeroSection();
-  loadGeminiKey();
 });
 
 // ==================== RENDER PRODUCTS ====================
@@ -238,10 +222,8 @@ if (modal) {
 }
 
 // ==================== CHATBOT (GEMINI AI) ====================
-// Default fallback key (can be overridden by Supabase settings)
-let GEMINI_API_KEY = 'AIzaSyDIBbkhQTK6R63Mhtu6oZDFOUTZ6gzEqOE';
+// The API Key is securely managed in Supabase and accessed via the /api/chat backend
 
-let ALL_PRODUCTS_TEXT = "Products info will be loaded dynamically.";
 if (typeof PRODUCT_DETAILS !== 'undefined') {
   ALL_PRODUCTS_TEXT = Object.values(PRODUCT_DETAILS).map(p => `
 [Product: ${p.name}]
@@ -384,28 +366,15 @@ async function getGeminiReply(userMsg) {
 
   try {
     let res;
-    // If a hardcoded key exists (local testing), use it directly
-    if (GEMINI_API_KEY && GEMINI_API_KEY.trim() !== '' && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: recentHistory,
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1000, topP: 0.9 }
-        })
-      });
-    } else {
-      // Production on Vercel: Call our secure serverless function
-      res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: recentHistory
-        })
-      });
-    }
+    // Production & Local: Call our secure serverless function
+    res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: recentHistory
+      })
+    });
 
     if (!res.ok) throw new Error(`API error: ${res.status}`);
 
