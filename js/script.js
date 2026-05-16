@@ -25,6 +25,7 @@ async function loadHeroSection() {
         const heroImg = document.getElementById('hero-img');
         if (heroImg) heroImg.src = v.bg_img;
       }
+      /* Disabled DB text overrides to preserve premium hardcoded HTML design
       if (v.tagline) {
         const tag = document.getElementById('hero-tag');
         if (tag) tag.textContent = v.tagline;
@@ -44,6 +45,7 @@ async function loadHeroSection() {
           btn.href = v.cta_link;
         }
       }
+      */
     }
   } catch (e) {
     console.warn("Failed to load hero from Supabase, using local fallback.", e);
