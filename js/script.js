@@ -728,12 +728,13 @@ async function sendMessage() {
 
         // 2. Save to Supabase enquiries table
         if (typeof saiDB !== 'undefined') {
-          saiDB.from('enquiries').insert({
-            name: leadName, email: leadEmail,
-            products: leadReqs, message: 'Collected via AI Chatbot', status: 'new',
-            source: '🤖 AI Chatbot'
-          }).then(r => {
-            if (r.error) console.error('Chatbot Supabase save error:', r.error.message);
+          var chatEnq = { name: leadName, email: leadEmail, products: leadReqs, message: 'Collected via AI Chatbot', status: 'new', source: '🤖 AI Chatbot' };
+          saiDB.from('enquiries').insert(chatEnq).then(r => {
+            if (r.error && r.error.message && r.error.message.indexOf('source') !== -1) {
+              delete chatEnq.source;
+              return saiDB.from('enquiries').insert(chatEnq);
+            }
+            if (r.error) console.error('Chatbot Supabase error:', r.error.message);
             else console.log('Chatbot lead saved to Supabase');
           });
         }
@@ -782,11 +783,12 @@ function attachFormNotifications(formEl) {
 
     // Save to Supabase (non-blocking)
     if (typeof saiDB !== 'undefined') {
-      saiDB.from('enquiries').insert({
-        name, email, phone: fd.get('Phone') || null,
-        company: company || null, products, message, status: 'new',
-        source: '📋 Contact Form'
-      }).then(r => {
+      var formEnq = { name, email, phone: fd.get('Phone') || null, company: company || null, products, message, status: 'new', source: '📋 Contact Form' };
+      saiDB.from('enquiries').insert(formEnq).then(r => {
+        if (r.error && r.error.message && r.error.message.indexOf('source') !== -1) {
+          delete formEnq.source;
+          return saiDB.from('enquiries').insert(formEnq);
+        }
         if (r.error) console.error('Supabase save error:', r.error.message);
         else console.log('Enquiry saved to Supabase');
       });
