@@ -443,6 +443,19 @@ if (closeChat) {
   closeChat.addEventListener('click', () => chatWindow.classList.remove('active'));
 }
 
+// Auto-open chatbot after 4 seconds (once per session)
+document.addEventListener('DOMContentLoaded', () => {
+  if (!sessionStorage.getItem('chatbotAutoOpened') && chatWindow) {
+    setTimeout(() => {
+      // Don't auto-open if user already opened it manually
+      if (!chatWindow.classList.contains('active')) {
+        openChat();
+      }
+      sessionStorage.setItem('chatbotAutoOpened', 'true');
+    }, 4000);
+  }
+});
+
 function addMsg(text, sender) {
   const d = document.createElement('div');
   d.className = `chat-message ${sender}`;
