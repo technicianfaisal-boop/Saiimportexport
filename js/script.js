@@ -57,7 +57,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderProducts();
   buildProductInterestCheckboxes();
   buildFooterProducts();
+  loadFormEmail();
 });
+
+// Dynamically set FormSubmit email from Supabase site_settings
+async function loadFormEmail() {
+  if (typeof saiDB === 'undefined') return;
+  try {
+    const { data, error } = await saiDB.from('site_settings').select('value').eq('key', 'form_email').single();
+    if (error || !data || !data.value || !data.value.email) return;
+    const email = data.value.email;
+    // Update all FormSubmit form actions on the page
+    document.querySelectorAll('form[action*="formsubmit.co"]').forEach(form => {
+      form.action = `https://formsubmit.co/${email}`;
+    });
+  } catch (e) {
+    console.warn('Could not load form email from DB, using default.');
+  }
+}
 
 // Dynamically build Product Interest checkboxes from PRODUCT_DETAILS
 function buildProductInterestCheckboxes() {

@@ -38,7 +38,7 @@ document.getElementById('logout-btn').addEventListener('click', async function()
 
 async function showDashboard() {
     loginWrapper.style.display = 'none'; dashboard.style.display = 'flex';
-    loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings(); loadWhatsAppSettings(); loadGeminiSettings();
+    loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings(); loadWhatsAppSettings(); loadGeminiSettings(); loadFormEmailSettings();
 }
 
 // ==================== TABS & SIDEBAR ====================
@@ -391,6 +391,22 @@ async function saveGeminiSettings() {
     var data = { apikey: document.getElementById('gemini_apikey').value.trim() };
     var r = await saiDB.from('site_settings').upsert({ key: 'gemini', value: data, updated_at: new Date().toISOString() });
     if (r.error) alert('Error: ' + r.error.message); else alert('✅ Gemini AI Chatbot settings saved!');
+}
+
+// ==================== FORM EMAIL SETTINGS ====================
+async function loadFormEmailSettings() {
+    var r = await saiDB.from('site_settings').select('*').eq('key', 'form_email').single();
+    if (r.data && r.data.value) {
+        document.getElementById('form_email').value = r.data.value.email || '';
+    }
+}
+
+async function saveFormEmailSettings() {
+    var email = document.getElementById('form_email').value.trim();
+    if (!email || !email.includes('@')) { alert('Please enter a valid email address'); return; }
+    var data = { email: email };
+    var r = await saiDB.from('site_settings').upsert({ key: 'form_email', value: data, updated_at: new Date().toISOString() });
+    if (r.error) alert('Error: ' + r.error.message); else alert('✅ Form email updated! All forms will now send inquiries to: ' + email);
 }
 
 // Hero image upload
