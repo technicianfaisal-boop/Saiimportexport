@@ -38,7 +38,7 @@ document.getElementById('logout-btn').addEventListener('click', async function()
 
 async function showDashboard() {
     loginWrapper.style.display = 'none'; dashboard.style.display = 'flex';
-    loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings(); loadWhatsAppSettings(); loadGeminiSettings(); loadFormEmailSettings();
+    loadProducts(); loadEnquiries(); loadBlogPosts(); loadHeroSettings(); loadTelegramSettings(); loadGeminiSettings(); loadFormEmailSettings();
 }
 
 // ==================== TABS & SIDEBAR ====================
@@ -386,23 +386,34 @@ async function saveHeroSettings() {
     if (r.error) alert('Error: ' + r.error.message); else alert('✅ Hero settings saved!');
 }
 
-// ==================== WHATSAPP SETTINGS ====================
-async function loadWhatsAppSettings() {
-    var r = await saiDB.from('site_settings').select('*').eq('key', 'whatsapp').single();
+// ==================== TELEGRAM SETTINGS ====================
+async function loadTelegramSettings() {
+    var r = await saiDB.from('site_settings').select('*').eq('key', 'telegram').single();
     if (r.data && r.data.value) {
         var v = r.data.value;
-        document.getElementById('wa_phone').value = v.phone || '';
-        document.getElementById('wa_apikey').value = v.apikey || '';
+        document.getElementById('tg_bot_token').value = v.bot_token || '';
+        document.getElementById('tg_chat_id').value = v.chat_id || '';
     }
 }
 
-async function saveWhatsAppSettings() {
+async function saveTelegramSettings() {
     var data = {
-        phone: document.getElementById('wa_phone').value,
-        apikey: document.getElementById('wa_apikey').value
+        bot_token: document.getElementById('tg_bot_token').value.trim(),
+        chat_id: document.getElementById('tg_chat_id').value.trim()
     };
-    var r = await saiDB.from('site_settings').upsert({ key: 'whatsapp', value: data, updated_at: new Date().toISOString() });
-    if (r.error) alert('Error: ' + r.error.message); else alert('✅ WhatsApp settings saved!');
+    if (!data.bot_token || !data.chat_id) { alert('Please enter both Bot Token and Chat ID'); return; }
+    var r = await saiDB.from('site_settings').upsert({ key: 'telegram', value: data, updated_at: new Date().toISOString() });
+    if (r.error) { alert('Error: ' + r.error.message); return; }
+    // Test notification
+    try {
+        var testRes = await fetch('https://api.telegram.org/bot' + data.bot_token + '/sendMessage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: data.chat_id, text: '✅ SAI Import Export Agro\n\nTelegram notifications connected successfully!\nYou will now receive instant alerts for all new enquiries.', parse_mode: 'Markdown' })
+        });
+        if (testRes.ok) alert('✅ Telegram settings saved & test message sent!');
+        else alert('⚠️ Settings saved but test message failed. Check Bot Token & Chat ID.');
+    } catch(e) { alert('⚠️ Settings saved but could not send test. Check your internet.'); }
 }
 
 // ==================== GEMINI SETTINGS ====================

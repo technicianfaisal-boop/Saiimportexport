@@ -89,19 +89,26 @@ async function loadFormEmail() {
   } catch (e) { /* use default */ }
 }
 
-// Reusable WhatsApp notification sender
-async function sendWhatsAppNotification(name, email, company, products, message) {
+// Reusable Telegram notification sender
+async function sendTelegramNotification(name, email, company, products, message) {
   if (typeof saiDB === 'undefined') return;
   try {
-    const res = await saiDB.from('site_settings').select('*').eq('key', 'whatsapp').single();
-    if (res.data && res.data.value && res.data.value.phone && res.data.value.apikey) {
-      const waPhone = res.data.value.phone.replace(/[^0-9]/g, '');
-      const waApi = res.data.value.apikey;
-      const waMsg = encodeURIComponent(`*🔔 New Website Enquiry!*\n\n*👤 Name:* ${name}\n*📧 Email:* ${email}\n*🏢 Company:* ${company || 'N/A'}\n*📦 Products:* ${products || 'N/A'}\n*💬 Message:* ${message || 'N/A'}`);
-      const waUrl = `https://api.callmebot.com/whatsapp.php?phone=${waPhone}&text=${waMsg}&apikey=${waApi}`;
-      fetch(waUrl, { mode: 'no-cors' }).catch(err => console.error('WhatsApp error:', err));
+    const res = await saiDB.from('site_settings').select('*').eq('key', 'telegram').single();
+    if (res.data && res.data.value && res.data.value.bot_token && res.data.value.chat_id) {
+      const token = res.data.value.bot_token;
+      const chatId = res.data.value.chat_id;
+      const text = `🔔 *New Website Enquiry!*\n\n👤 *Name:* ${name}\n📧 *Email:* ${email}\n🏢 *Company:* ${company || 'N/A'}\n📦 *Products:* ${products || 'N/A'}\n💬 *Message:* ${message || 'N/A'}`;
+      const url = `https://api.telegram.org/bot${token}/sendMessage`;
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' })
+      }).then(r => {
+        if (r.ok) console.log('Telegram notification sent');
+        else r.json().then(d => console.error('Telegram error:', d));
+      }).catch(err => console.error('Telegram error:', err));
     }
-  } catch (e) { console.error('WhatsApp notification error:', e); }
+  } catch (e) { console.error('Telegram notification error:', e); }
 }
 
 // Dynamically build Product Interest checkboxes from PRODUCT_DETAILS
@@ -754,7 +761,7 @@ async function sendMessage() {
         }
 
         // 3. Send WhatsApp notification
-        sendWhatsAppNotification(leadName, leadEmail, '', leadReqs, 'AI Chatbot Lead');
+        sendTelegramNotification(leadName, leadEmail, '', leadReqs, 'AI Chatbot Lead');
       }
     }
 
@@ -812,7 +819,7 @@ function attachFormNotifications(formEl) {
     }
 
     // 2. Send WhatsApp notification (non-blocking)
-    sendWhatsAppNotification(name, email, company, products, message);
+    sendTelegramNotification(name, email, company, products, message);
 
     // 3. Try FormSubmit first, fallback to Resend API
     let emailSent = false;

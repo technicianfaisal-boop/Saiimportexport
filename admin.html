@@ -277,18 +277,18 @@
             <!-- TAB: SETTINGS -->
             <div id="tab-settings" class="tab-panel">
                 <div class="card-grid">
-                    <!-- WhatsApp Settings -->
+                    <!-- Telegram Settings -->
                     <div class="setting-card">
-                        <h3>💬 WhatsApp Notifications</h3>
-                        <p class="settings-hint">Receive instant alerts for new enquiries via CallMeBot.</p>
-                        <label>WhatsApp Phone Number</label>
-                        <input type="text" id="wa_phone" placeholder="e.g. +919876543210 (include country code)">
-                        <label>CallMeBot API Key</label>
-                        <input type="text" id="wa_apikey" placeholder="e.g. 1234567">
+                        <h3>📲 Telegram Notifications</h3>
+                        <p class="settings-hint">Receive instant alerts for new enquiries via Telegram Bot — free & 100% reliable.</p>
+                        <label>Bot Token</label>
+                        <input type="text" id="tg_bot_token" placeholder="e.g. 123456789:ABCdefGHI...">
+                        <label>Chat ID</label>
+                        <input type="text" id="tg_chat_id" placeholder="e.g. 987654321">
                         <p class="settings-hint-sm">
-                            <strong>Setup:</strong> Save +34 644 71 84 82 in your phone contacts and send "I allow callmebot to send me messages" on WhatsApp to get your API key.
+                            <strong>Setup:</strong> 1) Open Telegram → search @BotFather → send /newbot → get Bot Token. 2) Message your bot, then visit https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates to get your Chat ID.
                         </p>
-                        <button class="btn-cta btn-full mt-12" onclick="saveWhatsAppSettings()">💾 Save WhatsApp Settings</button>
+                        <button class="btn-cta btn-full mt-12" onclick="saveTelegramSettings()">💾 Save Telegram Settings</button>
                     </div>
 
                     <!-- Gemini AI Settings -->
