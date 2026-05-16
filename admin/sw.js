@@ -1,6 +1,6 @@
-const CACHE_NAME = 'sai-admin-v1';
+const CACHE_NAME = 'sai-admin-v3';
 const ASSETS_TO_CACHE = [
-  '/admin.html',
+  '/admin/',
   '/css/styles.css',
   '/js/admin.js',
   '/js/supabase-client.js',
@@ -32,7 +32,7 @@ self.addEventListener('fetch', (event) => {
   // Never cache Supabase API calls
   if (event.request.url.includes('supabase.co')) return;
 
-  // Network-first for HTML and JS (always get fresh admin code)
+  // Network-first for HTML and JS
   if (event.request.url.endsWith('.html') || event.request.url.endsWith('.js') || event.request.url === event.request.referrer) {
     event.respondWith(
       fetch(event.request).then((response) => {
