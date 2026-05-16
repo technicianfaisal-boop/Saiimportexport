@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Port-to-Port Calculator | SAI Import Export Agro</title>
+    <meta name="description" content="Calculate real-time AI-estimated port-to-port shipping costs for Indian rice exports.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=20">
+    <link rel="icon" type="image/png" href="images/sai_logo_icon.webp">
+    <link rel="apple-touch-icon" href="images/sai_logo_icon_192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2d5a3c">
+    <style>
+        .calc-header { padding: 8rem 5% 4rem; background: var(--green-dark); color: #fff; text-align: center; }
+        .calc-header h1 { font-family: var(--serif); font-size: 3rem; margin-bottom: 0.5rem; color: var(--orange); }
+        .calc-header p { opacity: 0.8; max-width: 600px; margin: 0 auto; }
+        
+        .calc-container { max-width: 1000px; margin: -2rem auto 4rem; padding: 0 5%; position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 768px) { .calc-container { grid-template-columns: 1fr; } }
+        
+        .calc-box { background: #fff; padding: 2rem; border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .calc-box h2 { font-size: 1.5rem; color: var(--green-dark); margin-bottom: 1.5rem; border-bottom: 2px solid var(--green-light); padding-bottom: 0.5rem; }
+        
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text-dark); }
+        .form-control { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: var(--radius); font-size: 0.95rem; font-family: var(--sans); }
+        .form-control:focus { border-color: var(--green); outline: none; }
+        
+        .loading-state { display: none; text-align: center; padding: 3rem 0; }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid var(--green-light); border-top-color: var(--orange); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-state p { color: var(--text-mid); font-weight: 500; }
+        .loading-state span { font-size: 0.8rem; color: var(--text-light); }
+        
+        .result-state { display: none; }
+        .res-card { background: var(--off-white); padding: 1.5rem; border-radius: var(--radius); border-left: 4px solid var(--green); margin-bottom: 1.5rem; }
+        .res-card.total { background: #fff4ed; border-left-color: var(--orange); }
+        .res-val { font-size: 1.8rem; font-weight: 700; color: var(--green-dark); font-family: var(--serif); line-height: 1.2; }
+        .res-card.total .res-val { color: var(--orange); }
+        .res-label { font-size: 0.85rem; color: var(--text-mid); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        
+        .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .res-mini { background: #fff; border: 1px solid #eee; padding: 1rem; border-radius: var(--radius); text-align: center; }
+        .res-mini-val { font-weight: 700; color: var(--text-dark); font-size: 1.1rem; }
+        
+        .res-section { margin-bottom: 1.5rem; }
+        .res-section h4 { font-size: 1rem; color: var(--text-dark); margin-bottom: 0.5rem; }
+        .res-section p { font-size: 0.9rem; color: var(--text-mid); }
+        .res-section ul { padding-left: 1.2rem; font-size: 0.9rem; color: var(--text-mid); }
+        .res-section li { margin-bottom: 0.3rem; }
+        
+        .disclaimer { font-size: 0.8rem; color: var(--text-light); text-align: center; margin-top: 2rem; font-style: italic; }
+        .grounding-badge { display: inline-flex; align-items: center; gap: 5px; background: #e8f0ea; color: var(--green-dark); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem; }
+        
+        /* Utility classes for inline style removal */
+        .mb-0 { margin-bottom: 0; }
+        .mt-1rem { margin-top: 1rem; }
+        .inr-val-text { font-size: 0.9rem; color: var(--text-mid); margin-top: 4px; }
+        .icon-lg { font-size: 3rem; margin-bottom: 1rem; }
+        .icon-md { font-size: 2rem; margin-bottom: 1rem; }
+        .calc-initial { text-align: center; padding: 4rem 0; color: var(--text-light); }
+        .calc-error { display: none; text-align: center; padding: 2rem; color: #dc3545; }
+    </style>
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="top-bar" id="top-bar">
+        <div class="top-bar-inner">
+            <div class="top-bar-left">
+                <span>✉ saiimportexportagro0@gmail.com</span>
+                <span class="top-bar-divider">|</span>
+                <span>📞 +91 85958 27184</span>
+            </div>
+            <div class="top-bar-right">
+                <span>✅ APEDA &amp; FSSAI Certified</span>
+                <span class="top-bar-divider">|</span>
+                <span>🚢 FOB / CIF / CFR</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="logo">
+            <img src="images/sai_logo_icon.webp" alt="SAI Import Export Agro Icon" class="nav-logo-img">
+        </a>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="index.html#products">Products</a></li>
+            <li><a href="calculator.html" class="nav-active">Calculator</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        <a href="contact.html" class="btn-cta nav-cta">Enquire Now →</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    </nav>
+
+    <header class="calc-header">
+        <h1>Shipping Calculator</h1>
+        <p>AI-powered port-to-port estimates grounded in real-time market data.</p>
+    </header>
+
+    <div class="calc-container">
+        <!-- Input Form -->
+        <div class="calc-box">
+            <h2>Shipment Details</h2>
+            <form id="calc-form">
+                <div class="form-group">
+                    <label>Product</label>
+                    <select id="calc-product" class="form-control" title="Select Product" required>
+                        <option value="1121 Basmati Rice (White Sella)">1121 Basmati (White Sella)</option>
+                        <option value="1121 Basmati Rice (Golden Sella)">1121 Basmati (Golden Sella)</option>
+                        <option value="1509 Basmati Rice">1509 Basmati</option>
+                        <option value="Sona Masoori Rice">Sona Masoori</option>
+                        <option value="IR64 Parboiled Rice (5% Broken)">IR64 Parboiled</option>
+                        <option value="Swarna Raw Rice">Swarna Raw</option>
+                        <option value="100% Broken Rice">100% Broken White Rice</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Origin Port (India)</label>
+                    <select id="calc-origin" class="form-control" title="Select Origin Port" required>
+                        <option value="Nhava Sheva (Mumbai)">Nhava Sheva (Mumbai)</option>
+                        <option value="Mundra Port">Mundra Port</option>
+                        <option value="Haldia Port (Kolkata)">Haldia Port (Kolkata)</option>
+                        <option value="Chennai Port">Chennai Port</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Destination Port</label>
+                    <select id="calc-dest" class="form-control" title="Select Destination Port" required>
+                        <optgroup label="Middle East">
+                            <option value="Jebel Ali, UAE">Jebel Ali, UAE</option>
+                            <option value="Dammam, Saudi Arabia">Dammam, Saudi Arabia</option>
+                            <option value="Jeddah, Saudi Arabia">Jeddah, Saudi Arabia</option>
+                            <option value="Shuwaikh, Kuwait">Shuwaikh, Kuwait</option>
+                            <option value="Hamad Port, Qatar">Hamad Port, Qatar</option>
+                        </optgroup>
+                        <optgroup label="Asia & Oceania">
+                            <option value="Port Klang, Malaysia">Port Klang, Malaysia</option>
+                            <option value="Colombo, Sri Lanka">Colombo, Sri Lanka</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="Sydney, Australia">Sydney, Australia</option>
+                        </optgroup>
+                        <optgroup label="Europe">
+                            <option value="Hamburg, Germany">Hamburg, Germany</option>
+                            <option value="Felixstowe, UK">Felixstowe, UK</option>
+                            <option value="Rotterdam, Netherlands">Rotterdam, Netherlands</option>
+                        </optgroup>
+                        <optgroup label="Africa">
+                            <option value="Mombasa, Kenya">Mombasa, Kenya</option>
+                            <option value="Djibouti">Djibouti</option>
+                            <option value="Dakar, Senegal">Dakar, Senegal</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="res-grid mb-0">
+                    <div class="form-group">
+                        <label>Quantity (MT)</label>
+                        <input type="number" id="calc-qty" class="form-control" min="25" value="50" title="Quantity in MT" placeholder="Quantity in MT" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Packaging</label>
+                        <select id="calc-pack" class="form-control" title="Select Packaging">
+                            <option value="PP Bags 25kg">PP Bags 25kg</option>
+                            <option value="PP Bags 50kg">PP Bags 50kg</option>
+                            <option value="Non-Woven 10kg">Non-Woven 10kg</option>
+                            <option value="Jute Bags 50kg">Jute Bags</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-cta btn-full" id="calc-btn">Get Live Estimate</button>
+            </form>
+        </div>
+
+        <!-- Results Area -->
+        <div class="calc-box">
+            <h2>Estimation Result</h2>
+            
+            <div id="calc-initial" class="calc-initial">
+                <div class="icon-lg">🚢</div>
+                <p>Enter shipment details to get a real-time AI estimate</p>
+            </div>
+
+            <div id="calc-loading" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Gemini AI is analyzing live market data...</p>
+                <span id="calc-loading-text">Searching freight rates and commodity prices...</span>
+            </div>
+
+            <div id="calc-result" class="result-state">
+                <div class="grounding-badge" id="res-badge">✨ Grounded with Google Search</div>
+                
+                <div class="res-card total">
+                    <div class="res-label">Estimated Total CIF (<span id="res-qty"></span> MT)</div>
+                    <div class="res-val" id="res-total-usd">$0</div>
+                    <div class="inr-val-text" id="res-total-inr">₹0</div>
+                </div>
+
+                <div class="res-grid">
+                    <div class="res-mini">
+                        <div class="res-label">FOB Price</div>
+                        <div class="res-mini-val" id="res-fob"></div>
+                    </div>
+                    <div class="res-mini">
+                        <div class="res-label">Freight / MT</div>
+                        <div class="res-mini-val" id="res-freight"></div>
+                    </div>
+                    <div class="res-mini">
+                        <div class="res-label">Lead Time</div>
+                        <div class="res-mini-val" id="res-lead"></div>
+                    </div>
+                    <div class="res-mini">
+                        <div class="res-label">Containers</div>
+                        <div class="res-mini-val" id="res-containers"></div>
+                    </div>
+                </div>
+
+                <div class="res-section">
+                    <h4>Market Scenario</h4>
+                    <p id="res-market-sum"></p>
+                </div>
+                
+                <div class="res-section">
+                    <h4>Logistics & Risks</h4>
+                    <ul id="res-risks"></ul>
+                </div>
+
+                <a href="contact.html" class="btn-outline-dark btn-full mt-1rem">Request Binding Quote</a>
+                
+                <p class="disclaimer" id="res-disclaimer"></p>
+            </div>
+            
+            <div id="calc-error" class="calc-error">
+                <div class="icon-md">⚠️</div>
+                <p id="calc-err-msg">Failed to calculate estimate. Please try again.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="index.html" class="logo footer-logo"><img src="images/sai_logo_full.webp" alt="SAI Import Export Agro Logo" class="footer-logo-img"></a>
+                <p>India's trusted exporter of premium rice. Quality, trust, and reliability.</p>
+            </div>
+            <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About Us</a></li><li><a href="index.html#products">Products</a></li><li><a href="calculator.html">Calculator</a></li><li><a href="faq.html">FAQ</a></li></ul></div>
+            <div class="footer-col"><h4>Products</h4><ul id="footer-products-list"></ul></div>
+            <div class="footer-col"><h4>Legal</h4><ul><li><a href="privacy-policy.html">Privacy Policy</a></li><li><a href="terms-conditions.html">Terms & Conditions</a></li></ul></div>
+            <div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:saiimportexportagro0@gmail.com">saiimportexportagro0@gmail.com</a></li><li><a href="tel:+918595827184">+91 85958 27184</a></li><li><a href="https://maps.app.goo.gl/KnddEXYAAbevAWq36" target="_blank" rel="noopener noreferrer">Indirapuram, Ghaziabad</a></li></ul></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 SAI Import Export Agro. All rights reserved.</p></div>
+    </footer>
+
+    <script src="js/script.js?v=20"></script>
+    <script>
+        const form = document.getElementById('calc-form');
+        const btn = document.getElementById('calc-btn');
+        const initial = document.getElementById('calc-initial');
+        const loading = document.getElementById('calc-loading');
+        const result = document.getElementById('calc-result');
+        const errBox = document.getElementById('calc-error');
+        const errMsg = document.getElementById('calc-err-msg');
+
+        const loadTexts = [
+            "Initializing Gemini AI...",
+            "Searching current commodity prices...",
+            "Analyzing global freight rates...",
+            "Checking port congestion data...",
+            "Compiling final estimate..."
+        ];
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                product: document.getElementById('calc-product').value,
+                origin: document.getElementById('calc-origin').value,
+                destination: document.getElementById('calc-dest').value,
+                quantity: document.getElementById('calc-qty').value,
+                packaging: document.getElementById('calc-pack').value
+            };
+
+            initial.style.display = 'none';
+            result.style.display = 'none';
+            errBox.style.display = 'none';
+            loading.style.display = 'block';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+
+            let textIdx = 0;
+            const textInt = setInterval(() => {
+                textIdx = (textIdx + 1) % loadTexts.length;
+                document.getElementById('calc-loading-text').innerText = loadTexts[textIdx];
+            }, 2000);
+
+            try {
+                const res = await fetch('/api/calculator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const json = await res.json();
+                
+                clearInterval(textInt);
+                loading.style.display = 'none';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+
+                if (!res.ok || !json.estimate) {
+                    throw new Error(json.error || 'Failed to generate estimate');
+                }
+
+                const est = json.estimate;
+                
+                // Populate UI
+                document.getElementById('res-qty').textContent = json.quantity;
+                document.getElementById('res-total-usd').textContent = `$${est.cif_total.min.toLocaleString()} - $${est.cif_total.max.toLocaleString()}`;
+                if (est.inr_total) {
+                    document.getElementById('res-total-inr').textContent = `approx ₹${est.inr_total.min.toLocaleString()} - ₹${est.inr_total.max.toLocaleString()}`;
+                } else {
+                    document.getElementById('res-total-inr').textContent = '';
+                }
+
+                document.getElementById('res-fob').textContent = `$${est.fob_price.min}-$${est.fob_price.max}`;
+                document.getElementById('res-freight').textContent = `$${est.freight_cost.min}-$${est.freight_cost.max}`;
+                document.getElementById('res-lead').textContent = `${est.lead_time.min}-${est.lead_time.max} days`;
+                document.getElementById('res-containers').textContent = est.containers;
+                
+                let marketText = `<strong>Scenario:</strong> <span style="text-transform:capitalize">${est.market_scenario}</span><br>`;
+                marketText += est.market_summary;
+                document.getElementById('res-market-sum').innerHTML = marketText;
+
+                const risksHtml = est.risk_factors.map(r => `<li>${r}</li>`).join('');
+                document.getElementById('res-risks').innerHTML = risksHtml;
+
+                document.getElementById('res-disclaimer').textContent = est.disclaimer;
+                
+                if (json.grounded) {
+                    document.getElementById('res-badge').style.display = 'inline-flex';
+                } else {
+                    document.getElementById('res-badge').style.display = 'none';
+                }
+
+                result.style.display = 'block';
+
+            } catch (err) {
+                clearInterval(textInt);
+                loading.style.display = 'none';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                errBox.style.display = 'block';
+                errMsg.textContent = err.message;
+            }
+        });
+    </script>
+</body>
+</html>

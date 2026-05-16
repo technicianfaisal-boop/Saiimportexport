@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frequently Asked Questions | SAI Import Export Agro</title>
+    <meta name="description" content="Find answers to common questions about our B2B rice export process, minimum order quantities, payment terms, and logistics.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=20">
+    <link rel="icon" type="image/png" href="images/sai_logo_icon.webp">
+    <link rel="apple-touch-icon" href="images/sai_logo_icon_192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2d5a3c">
+    <style>
+        .faq-header { padding: 8rem 5% 4rem; background: var(--green-dark); color: #fff; text-align: center; }
+        .faq-header h1 { font-family: var(--serif); font-size: 3rem; margin-bottom: 0.5rem; color: var(--orange); }
+        .faq-header p { opacity: 0.8; max-width: 600px; margin: 0 auto; }
+        
+        .faq-container { max-width: 800px; margin: -2rem auto 4rem; padding: 0 5%; position: relative; z-index: 10; }
+        .faq-category { margin-bottom: 2rem; background: #fff; border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 2rem; }
+        .faq-category h2 { font-size: 1.5rem; color: var(--green-dark); margin-bottom: 1.5rem; border-bottom: 2px solid var(--green-light); padding-bottom: 0.5rem; }
+        
+        .accordion-item { border-bottom: 1px solid #eaeaea; margin-bottom: 0.5rem; }
+        .accordion-item:last-child { border-bottom: none; margin-bottom: 0; }
+        
+        .accordion-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left; background: none; border: none; padding: 1rem 0; font-size: 1.05rem; font-weight: 600; color: var(--text-dark); cursor: pointer; transition: color 0.3s; font-family: var(--sans); }
+        .accordion-btn:hover { color: var(--green); }
+        
+        .accordion-icon { width: 24px; height: 24px; position: relative; flex-shrink: 0; margin-left: 1rem; transition: transform 0.3s ease; }
+        .accordion-icon::before, .accordion-icon::after { content: ''; position: absolute; background: var(--green); top: 50%; left: 50%; transform: translate(-50%, -50%); transition: transform 0.3s ease; }
+        .accordion-icon::before { width: 14px; height: 2px; }
+        .accordion-icon::after { width: 2px; height: 14px; }
+        
+        .accordion-btn.active .accordion-icon::after { transform: translate(-50%, -50%) rotate(90deg); opacity: 0; }
+        
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; padding: 0; }
+        .accordion-content p { color: var(--text-mid); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem; }
+        .accordion-content ul { padding-left: 1.5rem; margin-bottom: 1rem; color: var(--text-mid); font-size: 0.95rem; }
+        .accordion-content li { margin-bottom: 0.5rem; }
+        .accordion-content.active { max-height: 500px; padding-bottom: 1rem; }
+        
+        .faq-link { color: var(--green); text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="top-bar" id="top-bar">
+        <div class="top-bar-inner">
+            <div class="top-bar-left">
+                <span>✉ saiimportexportagro0@gmail.com</span>
+                <span class="top-bar-divider">|</span>
+                <span>📞 +91 85958 27184</span>
+            </div>
+            <div class="top-bar-right">
+                <span>✅ APEDA &amp; FSSAI Certified</span>
+                <span class="top-bar-divider">|</span>
+                <span>🚢 FOB / CIF / CFR</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="logo">
+            <img src="images/sai_logo_icon.webp" alt="SAI Import Export Agro Icon" class="nav-logo-img">
+        </a>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="index.html#products">Products</a></li>
+            <li><a href="calculator.html">Calculator</a></li>
+            <li><a href="faq.html" class="nav-active">FAQ</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        <a href="contact.html" class="btn-cta nav-cta">Enquire Now →</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    </nav>
+
+    <header class="faq-header">
+        <h1>Frequently Asked Questions</h1>
+        <p>Everything you need to know about partnering with India's most trusted rice exporter.</p>
+    </header>
+
+    <div class="faq-container">
+        <!-- Category 1 -->
+        <div class="faq-category">
+            <h2>📦 Orders & Quantities</h2>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">What is your Minimum Order Quantity (MOQ)?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>Our standard Minimum Order Quantity (MOQ) is <strong>1x 20FT Container (approx. 25 Metric Tons)</strong>. This ensures competitive ocean freight rates and optimal packaging for international transit.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">Can I request a product sample before placing a bulk order?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>Yes, absolutely. We provide samples (1-2 kg) via international courier (DHL/FedEx). The buyer is required to cover the courier charges, which will be adjusted against your first commercial order.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">Do you offer mixed containers?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>Yes, we can accommodate mixed containers with different rice varieties (e.g., Basmati and Non-Basmati) provided the total volume reaches the container capacity.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 2 -->
+        <div class="faq-category">
+            <h2>💳 Pricing & Payment Terms</h2>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">What payment methods do you accept?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>We work with secure international payment terms to protect both parties:</p>
+                    <ul>
+                        <li><strong>100% Irrevocable Letter of Credit (L/C) at sight</strong> from a prime international bank.</li>
+                        <li><strong>Telegraphic Transfer (T/T):</strong> 30% advance against Proforma Invoice, and 70% balance against scan copies of original shipping documents.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">Are your prices fixed or negotiable?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>Rice is an agricultural commodity, so prices fluctuate based on crop harvest, domestic demand, and government policies. The price quoted in our Proforma Invoice is fixed for the validity period (usually 7 days). For high-volume contracts (1,000+ MT), we offer customized volume pricing.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">Do your prices include ocean freight?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>We offer flexible Incoterms. We can quote <strong>FOB (Free on Board)</strong> Indian ports, or <strong>CIF (Cost, Insurance & Freight) / CFR</strong> to your destination port. Use our <a href="calculator.html" class="faq-link">Shipping Calculator</a> for real-time estimates.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 3 -->
+        <div class="faq-category">
+            <h2>🚢 Shipping & Logistics</h2>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">Which Indian ports do you export from?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>Depending on the rice variety and your destination, we ship from major Indian ports including Nhava Sheva (Mumbai), Mundra Port (Gujarat), Kandla, Chennai, and Haldia (Kolkata).</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">What is the standard lead time for an order?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>The standard lead time from order confirmation/advance receipt to port loading is <strong>10 to 15 days</strong>. Ocean transit time depends on the destination port (e.g., 5-8 days to UAE, 25-30 days to Europe).</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">What packaging options are available?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>We provide multiple export-grade packaging options:</p>
+                    <ul>
+                        <li>PP Bags (10kg, 25kg, 50kg)</li>
+                        <li>Non-Woven Bags (5kg, 10kg, 25kg)</li>
+                        <li>Jute Bags (for premium Basmati, 10kg, 20kg, 40kg)</li>
+                    </ul>
+                    <p>We also offer Private Labeling (OEM) where we pack the rice under your brand name.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 4 -->
+        <div class="faq-category">
+            <h2>✅ Quality & Certifications</h2>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">How do you ensure rice quality?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>We have strict quality control measures at every step—from procurement to processing and packing. We utilize fully automated Sortex machines to ensure uniform grain length, zero impurities, and precise moisture levels. You can read more on our <a href="certifications.html" class="faq-link">Certifications page</a>.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">Do you provide third-party inspection reports?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>Yes. We highly recommend third-party inspections for transparency. We facilitate inspections by internationally recognized agencies like <strong>SGS, Bureau Veritas, or Cotecna</strong> at the loading port for weight, quality, and condition. The inspection charges are typically borne by the buyer.</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <button class="accordion-btn">What export documents do you provide?<span class="accordion-icon"></span></button>
+                <div class="accordion-content">
+                    <p>Standard documents provided with every shipment include:</p>
+                    <ul>
+                        <li>Commercial Invoice & Packing List</li>
+                        <li>Bill of Lading (B/L)</li>
+                        <li>Certificate of Origin (Chamber of Commerce)</li>
+                        <li>Phytosanitary Certificate (Govt. of India)</li>
+                        <li>Fumigation Certificate</li>
+                        <li>Third-party Inspection Certificate (if opted)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="index.html" class="logo footer-logo"><img src="images/sai_logo_full.webp" alt="SAI Import Export Agro Logo" class="footer-logo-img"></a>
+                <p>India's trusted exporter of premium rice. Quality, trust, and reliability.</p>
+            </div>
+            <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About Us</a></li><li><a href="index.html#products">Products</a></li><li><a href="calculator.html">Calculator</a></li><li><a href="faq.html">FAQ</a></li></ul></div>
+            <div class="footer-col"><h4>Products</h4><ul id="footer-products-list"></ul></div>
+            <div class="footer-col"><h4>Legal</h4><ul><li><a href="privacy-policy.html">Privacy Policy</a></li><li><a href="terms-conditions.html">Terms & Conditions</a></li></ul></div>
+            <div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:saiimportexportagro0@gmail.com">saiimportexportagro0@gmail.com</a></li><li><a href="tel:+918595827184">+91 85958 27184</a></li><li><a href="https://maps.app.goo.gl/KnddEXYAAbevAWq36" target="_blank" rel="noopener noreferrer">Indirapuram, Ghaziabad</a></li></ul></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 SAI Import Export Agro. All rights reserved.</p></div>
+    </footer>
+
+    <script src="js/script.js?v=20"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accBtns = document.querySelectorAll('.accordion-btn');
+            
+            accBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    
+                    if (content.classList.contains('active')) {
+                        content.classList.remove('active');
+                    } else {
+                        // Optional: close all other accordions
+                        // document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
+                        // document.querySelectorAll('.accordion-btn').forEach(b => b.classList.remove('active'));
+                        // this.classList.add('active');
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
