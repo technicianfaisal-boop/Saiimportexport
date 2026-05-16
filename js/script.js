@@ -1093,3 +1093,63 @@ langSearch.addEventListener('keydown', (e) => {
   renderLangList();
 })();
 
+// ==================== CATALOG DOWNLOAD MODAL ====================
+function openCatalogModal() {
+  const modal = document.getElementById('catalog-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeCatalogModal() {
+  const modal = document.getElementById('catalog-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    document.getElementById('cat-msg').style.display = 'none';
+    document.getElementById('catalog-form').reset();
+  }
+}
+
+const catalogForm = document.getElementById('catalog-form');
+if (catalogForm) {
+  catalogForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('cat-name').value.trim();
+    const email = document.getElementById('cat-email').value.trim();
+    const phone = document.getElementById('cat-phone').value.trim();
+    
+    document.querySelector('#catalog-form button').disabled = true;
+    document.getElementById('cat-msg').style.display = 'block';
+
+    // 1. Save Lead to Supabase
+    if (typeof saiDB !== 'undefined') {
+      const lead = { name, email, phone: phone || null, message: 'Requested Brochure/Catalog Download', status: 'new', source: '📥 Catalog Download' };
+      saiDB.from('enquiries').insert(lead).then(r => {
+        if (r.error && r.error.message && r.error.message.indexOf('source') !== -1) {
+          delete lead.source;
+          saiDB.from('enquiries').insert(lead);
+        }
+      });
+    }
+
+    // 2. Send Telegram Alert
+    sendTelegramNotification(name, email, '', 'Full Catalog Download', 'User downloaded the brochure.');
+
+    // 3. Trigger PDF Download (Creating a dummy PDF for now)
+    setTimeout(() => {
+      // Smallest valid 1-page PDF base64 string
+      const dummyPdfData = "JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSCgkgID4+CiAgPj4KICAvQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCgo0IDAgb2JqCjw8CiAgL1R5cGUgL0ZvbnQKICAvU3VidHlwZSAvVHlwZTExCiAgL0Jhc2VGb250IC9UaW1lcy1Sb21hbgo+PgplbmRvYmoKCjUgMCBvYmoKPDwgL0xlbmd0aCA0NCA+PgpzdHJlYW0KQlQKL0YxIDE4IFRmCjAgMCAwIHJnCjUwIDEwMCBUZAooU0FJIEltcG9ydCBFeHBvcnQpIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxMCAwMDAwMCBuIAowMDAwMDAwMDYwIDAwMDAwIG4gCjAwMDAwMDAxNDggMDAwMDAgbiAKMDAwMDAwMDI1OCAwMDAwMCBuIAowMDAwMDAwMzUyIDAwMDAwIG4gCnRyYWlsZXIKPDwKICAvU2l6ZSA2CiAgL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjQ0NgolJUVPRgo=";
+      const link = document.createElement('a');
+      link.href = 'data:application/pdf;base64,' + dummyPdfData;
+      link.download = 'SAI_Import_Export_Catalog.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setTimeout(() => closeCatalogModal(), 2000);
+    }, 1500);
+  });
+}
+
