@@ -717,14 +717,28 @@ async function sendMessage() {
         formData.append('Email', leadEmail);
         formData.append('Requirements', leadReqs);
         
-        fetch(`https://formsubmit.co/${FORMSUBMIT_EMAIL}`, {
+        fetch(`https://formsubmit.co/ajax/${FORMSUBMIT_EMAIL}`, {
           method: 'POST',
           body: formData,
           headers: { 'Accept': 'application/json' }
         }).then(r => {
           if (r.ok) console.log('Chatbot lead email sent via FormSubmit');
-          else console.error('Chatbot FormSubmit failed:', r.status);
-        }).catch(err => console.error('Chatbot email error:', err));
+          else {
+            console.warn('Chatbot FormSubmit failed:', r.status, '— trying Resend fallback');
+            return fetch('/api/send-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ to: 'technicianfaisal@gmail.com', name: leadName, email: leadEmail, products: leadReqs, message: 'AI Chatbot Lead', source: '🤖 AI Chatbot' })
+            });
+          }
+        }).catch(err => {
+          console.warn('FormSubmit down, trying Resend:', err.message);
+          fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: 'technicianfaisal@gmail.com', name: leadName, email: leadEmail, products: leadReqs, message: 'AI Chatbot Lead', source: '🤖 AI Chatbot' })
+          }).catch(e => console.error('Both email services failed:', e));
+        });
 
         // 2. Save to Supabase enquiries table
         if (typeof saiDB !== 'undefined') {
@@ -800,14 +814,15 @@ function attachFormNotifications(formEl) {
     // 2. Send WhatsApp notification (non-blocking)
     sendWhatsAppNotification(name, email, company, products, message);
 
-    // 3. Try FormSubmit via AJAX endpoint (for email delivery)
+    // 3. Try FormSubmit first, fallback to Resend API
+    let emailSent = false;
     try {
       fd.append('_captcha', 'false');
       fd.append('_template', 'table');
       if (email) fd.append('_replyto', email);
       
       const controller = new AbortController();
-      setTimeout(() => controller.abort(), 10000); // 10s timeout
+      setTimeout(() => controller.abort(), 8000); // 8s timeout
 
       const res = await fetch(`https://formsubmit.co/ajax/${FORMSUBMIT_EMAIL}`, {
         method: 'POST',
@@ -816,10 +831,28 @@ function attachFormNotifications(formEl) {
         signal: controller.signal
       });
 
-      if (res.ok) console.log('FormSubmit email sent');
+      if (res.ok) { emailSent = true; console.log('FormSubmit email sent'); }
       else console.warn('FormSubmit returned:', res.status);
     } catch (err) {
-      console.warn('FormSubmit unavailable (data saved to Supabase):', err.message);
+      console.warn('FormSubmit unavailable:', err.message);
+    }
+
+    // 4. Fallback: send email via Resend API if FormSubmit failed
+    if (!emailSent) {
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: 'technicianfaisal@gmail.com', // Resend free tier only sends to account owner
+            name, email, company, products, message,
+            source: '📋 Contact Form'
+          })
+        });
+        console.log('Fallback email sent via Resend API');
+      } catch (e) {
+        console.warn('Resend fallback also failed:', e.message);
+      }
     }
 
     // 4. Always redirect to thank-you page (data is in Supabase regardless)
