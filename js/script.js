@@ -60,20 +60,64 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadFormEmail();
 });
 
-// Dynamically set FormSubmit email from Supabase site_settings
+// ==================== FORM SUBMISSION VIA RESEND ====================
+let ADMIN_EMAIL = 'saiimportexportagro0@gmail.com'; // Default fallback
+
 async function loadFormEmail() {
   if (typeof saiDB === 'undefined') return;
   try {
-    const { data, error } = await saiDB.from('site_settings').select('value').eq('key', 'form_email').single();
-    if (error || !data || !data.value || !data.value.email) return;
-    const email = data.value.email;
-    // Update all FormSubmit form actions on the page
-    document.querySelectorAll('form[action*="formsubmit.co"]').forEach(form => {
-      form.action = `https://formsubmit.co/${email}`;
+    const { data } = await saiDB.from('site_settings').select('value').eq('key', 'form_email').single();
+    if (data && data.value && data.value.email) ADMIN_EMAIL = data.value.email;
+  } catch (e) { /* use default */ }
+
+  // Intercept all forms with formsubmit action and handle via our API
+  document.querySelectorAll('form[action*="formsubmit.co"]').forEach(form => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"], .btn-cta');
+      const origText = btn ? btn.textContent : '';
+      if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+
+      const formData = new FormData(form);
+      const payload = {
+        to: ADMIN_EMAIL,
+        name: formData.get('Name') || formData.get('name') || '',
+        email: formData.get('Email') || formData.get('email') || '',
+        phone: formData.get('Phone') || formData.get('phone') || '',
+        company: formData.get('Company') || formData.get('company') || '',
+        country: formData.get('Country') || formData.get('country') || '',
+        message: formData.get('Message') || formData.get('message') || '',
+        source: formData.get('_subject') || 'Website Inquiry',
+        subject: formData.get('_subject') || '🍚 New SAI Import Export Agro Inquiry'
+      };
+
+      // Collect selected products
+      const products = formData.getAll('Products');
+      if (products.length) payload.products = products.join(', ');
+      if (formData.get('Product')) payload.products = formData.get('Product');
+
+      try {
+        const res = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          window.location.href = 'thank-you.html';
+        } else {
+          throw new Error('API failed');
+        }
+      } catch (err) {
+        // Fallback: submit via FormSubmit if our API fails
+        console.warn('Resend API failed, falling back to FormSubmit');
+        form.removeEventListener('submit', arguments.callee);
+        form.submit();
+      } finally {
+        if (btn) { btn.textContent = origText; btn.disabled = false; }
+      }
     });
-  } catch (e) {
-    console.warn('Could not load form email from DB, using default.');
-  }
+  });
 }
 
 // Dynamically build Product Interest checkboxes from PRODUCT_DETAILS
