@@ -517,8 +517,9 @@ function getFallbackReply(msg) {
 }
 
 async function getGeminiReply(userMsg) {
-  // If API key not configured, use fallback
+  // If API key not configured in admin panel, use fallback
   if (!IS_GEMINI_CONFIGURED) {
+    console.log('Chatbot: Gemini not configured in admin panel, using fallback replies.');
     return getFallbackReply(userMsg);
   }
 
@@ -529,12 +530,11 @@ async function getGeminiReply(userMsg) {
   const recentHistory = chatHistory.slice(-10);
 
   try {
-    let res;
-    // Production & Local: Call our secure serverless function
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
-    res = await fetch('/api/chat', {
+    console.log('Chatbot: Sending request to /api/chat...');
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -545,17 +545,30 @@ async function getGeminiReply(userMsg) {
     });
     clearTimeout(timeoutId);
 
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error('Chatbot API error:', res.status, errorData);
+      throw new Error(`API returned ${res.status}: ${errorData.error || 'Unknown'}`);
+    }
 
     const data = await res.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || getFallbackReply(userMsg);
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!reply) {
+      console.warn('Chatbot: Empty reply from Gemini, data:', JSON.stringify(data).substring(0, 200));
+      return getFallbackReply(userMsg);
+    }
 
     // Add bot reply to history
     chatHistory.push({ role: 'model', parts: [{ text: reply }] });
-
+    console.log('Chatbot: Got AI reply successfully.');
     return reply;
   } catch (err) {
-    console.warn('Gemini API error, using fallback:', err);
+    if (err.name === 'AbortError') {
+      console.error('Chatbot: Request timed out after 20 seconds');
+    } else {
+      console.error('Chatbot: Error getting AI reply:', err.message);
+    }
     return getFallbackReply(userMsg);
   }
 }
