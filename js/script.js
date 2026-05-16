@@ -41,7 +41,7 @@ async function loadHeroSection() {
             const splitIndex = Math.floor(words.length / 2);
             const p1 = words.slice(0, splitIndex).join(' ');
             const p2 = words.slice(splitIndex).join(' ');
-            head.innerHTML = `${p1},<br><em>${p2}.</em>`;
+            head.innerHTML = `${p1}<br><em>${p2}</em>`;
           } else {
             head.innerHTML = v.heading;
           }
