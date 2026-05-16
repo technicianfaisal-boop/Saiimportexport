@@ -97,16 +97,21 @@ async function sendTelegramNotification(name, email, company, products, message)
     if (res.data && res.data.value && res.data.value.bot_token && res.data.value.chat_id) {
       const token = res.data.value.bot_token;
       const chatId = res.data.value.chat_id;
-      const text = `🔔 *New Website Enquiry!*\n\n👤 *Name:* ${name}\n📧 *Email:* ${email}\n🏢 *Company:* ${company || 'N/A'}\n📦 *Products:* ${products || 'N/A'}\n💬 *Message:* ${message || 'N/A'}`;
+      
+      // Escape HTML chars
+      const escapeHtml = (text) => (text || 'N/A').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      
+      const text = `🔔 <b>New Website Enquiry!</b>\n\n👤 <b>Name:</b> ${escapeHtml(name)}\n📧 <b>Email:</b> ${escapeHtml(email)}\n🏢 <b>Company:</b> ${escapeHtml(company)}\n📦 <b>Products:</b> ${escapeHtml(products)}\n💬 <b>Message:</b>\n<pre>${escapeHtml(message)}</pre>`;
+      
       const url = `https://api.telegram.org/bot${token}/sendMessage`;
       fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' })
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
       }).then(r => {
         if (r.ok) console.log('Telegram notification sent');
         else r.json().then(d => console.error('Telegram error:', d));
-      }).catch(err => console.error('Telegram error:', err));
+      }).catch(err => console.error('Telegram network error:', err));
     }
   } catch (e) { console.error('Telegram notification error:', e); }
 }
