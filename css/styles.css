@@ -560,5 +560,5 @@ html { margin-top: 0 !important; top: 0 !important; }
   .testimonials-stats { grid-template-columns: 1fr 1fr; }
   .tstat-num { font-size: 1.8rem; }
 }
-
+.mt-2rem { margin-top: 2rem; }
 
