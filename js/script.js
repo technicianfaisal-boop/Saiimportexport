@@ -76,7 +76,7 @@ async function loadGeminiSetting() {
   }
 }
 
-// ==================== FORM SUBMISSION VIA RESEND ====================
+// ==================== FORM SUBMISSION (FormSubmit + Supabase + WhatsApp) ====================
 let ADMIN_EMAIL = 'saiimportexportagro0@gmail.com'; // Default fallback
 
 async function loadFormEmail() {
@@ -86,54 +86,49 @@ async function loadFormEmail() {
     if (data && data.value && data.value.email) ADMIN_EMAIL = data.value.email;
   } catch (e) { /* use default */ }
 
-  // Intercept all forms with formsubmit action and handle via our API
+  // Update FormSubmit action URLs with admin email from DB
   document.querySelectorAll('form[action*="formsubmit.co"]').forEach(form => {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = form.querySelector('button[type="submit"], .btn-cta');
-      const origText = btn ? btn.textContent : '';
-      if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+    form.action = `https://formsubmit.co/${ADMIN_EMAIL}`;
 
-      const formData = new FormData(form);
-      const payload = {
-        to: ADMIN_EMAIL,
-        name: formData.get('Name') || formData.get('name') || '',
-        email: formData.get('Email') || formData.get('email') || '',
-        phone: formData.get('Phone') || formData.get('phone') || '',
-        company: formData.get('Company') || formData.get('company') || '',
-        country: formData.get('Country') || formData.get('country') || '',
-        message: formData.get('Message') || formData.get('message') || '',
-        source: formData.get('_subject') || 'Website Inquiry',
-        subject: formData.get('_subject') || '🍚 New SAI Import Export Agro Inquiry'
-      };
+    // Add Supabase + WhatsApp on submit (FormSubmit still handles email)
+    form.addEventListener('submit', () => {
+      const fd = new FormData(form);
+      const name = (fd.get('First Name') || fd.get('Name') || '') + ' ' + (fd.get('Last Name') || '');
+      const email = fd.get('Email') || fd.get('email') || '';
+      const products = fd.getAll('Products').join(', ') || fd.get('Product') || '';
+      const message = fd.get('Message') || fd.get('Requirements') || '';
+      const company = fd.get('Company') || '';
 
-      // Collect selected products
-      const products = formData.getAll('Products');
-      if (products.length) payload.products = products.join(', ');
-      if (formData.get('Product')) payload.products = formData.get('Product');
-
-      try {
-        const res = await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+      // Save to Supabase enquiries
+      if (typeof saiDB !== 'undefined') {
+        saiDB.from('enquiries').insert({
+          name: name.trim(), email, company: company || null,
+          products: products || null, message: message || null, status: 'new'
+        }).then(r => {
+          if (r.error) console.error('Supabase save error:', r.error.message);
+          else console.log('Enquiry saved to Supabase');
         });
-
-        if (res.ok) {
-          window.location.href = 'thank-you.html';
-        } else {
-          throw new Error('API failed');
-        }
-      } catch (err) {
-        // Fallback: submit via FormSubmit if our API fails
-        console.warn('Resend API failed, falling back to FormSubmit');
-        form.removeEventListener('submit', arguments.callee);
-        form.submit();
-      } finally {
-        if (btn) { btn.textContent = origText; btn.disabled = false; }
       }
+
+      // Send WhatsApp notification
+      sendWhatsAppNotification(name.trim(), email, company, products, message);
     });
   });
+}
+
+// Reusable WhatsApp notification sender
+async function sendWhatsAppNotification(name, email, company, products, message) {
+  if (typeof saiDB === 'undefined') return;
+  try {
+    const res = await saiDB.from('site_settings').select('*').eq('key', 'whatsapp').single();
+    if (res.data && res.data.value && res.data.value.phone && res.data.value.apikey) {
+      const waPhone = res.data.value.phone.replace(/[^0-9]/g, '');
+      const waApi = res.data.value.apikey;
+      const waMsg = encodeURIComponent(`*🔔 New Website Enquiry!*\n\n*👤 Name:* ${name}\n*📧 Email:* ${email}\n*🏢 Company:* ${company || 'N/A'}\n*📦 Products:* ${products || 'N/A'}\n*💬 Message:* ${message || 'N/A'}`);
+      const waUrl = `https://api.callmebot.com/whatsapp.php?phone=${waPhone}&text=${waMsg}&apikey=${waApi}`;
+      fetch(waUrl, { mode: 'no-cors' }).catch(err => console.error('WhatsApp error:', err));
+    }
+  } catch (e) { console.error('WhatsApp notification error:', e); }
 }
 
 // Dynamically build Product Interest checkboxes from PRODUCT_DETAILS
@@ -738,50 +733,39 @@ async function sendMessage() {
         }
         // ========== VALIDATION PASSED — SEND VIA RESEND + WHATSAPP + SUPABASE ==========
 
-        // 1. Send email via Resend API (admin notification + buyer auto-response)
-        fetch('/api/send-email', {
+        // 1. Send email via FormSubmit (admin email + auto-response to buyer)
+        const formData = new FormData();
+        formData.append('_subject', '🤖 AI Chatbot Lead — SAI Import Export Agro');
+        formData.append('_captcha', 'false');
+        formData.append('_template', 'table');
+        formData.append('_replyto', leadEmail);
+        formData.append('_autoresponse', `Thank you for chatting with SAI Import Export Agro! 🍚\n\nWe have noted your requirements and our export team is preparing a personalized quotation for you.\n\nYou will hear from us within 24 hours.\n\n📧 saiimportexportagro0@gmail.com\n📞 +91 85958 27184\n\nWarm regards,\nSAI Import Export Agro Export Team`);
+        formData.append('Name', leadName);
+        formData.append('Email', leadEmail);
+        formData.append('Requirements', leadReqs);
+        
+        fetch(`https://formsubmit.co/${ADMIN_EMAIL}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: ADMIN_EMAIL,
-            name: leadName,
-            email: leadEmail,
-            products: leadReqs,
-            message: `Collected via AI Chatbot conversation`,
-            source: '🤖 AI Chatbot Lead',
-            subject: `🤖 AI Chatbot Lead — ${leadName}`
-          })
+          body: formData,
+          headers: { 'Accept': 'application/json' }
         }).then(r => {
-          if (r.ok) console.log('Chatbot lead email sent successfully');
-          else console.error('Chatbot lead email failed:', r.status);
+          if (r.ok) console.log('Chatbot lead email sent via FormSubmit');
+          else console.error('Chatbot FormSubmit failed:', r.status);
         }).catch(err => console.error('Chatbot email error:', err));
 
         // 2. Save to Supabase enquiries table
         if (typeof saiDB !== 'undefined') {
           saiDB.from('enquiries').insert({
-            name: leadName,
-            email: leadEmail,
-            products: leadReqs,
-            message: 'Collected via AI Chatbot',
-            status: 'new'
+            name: leadName, email: leadEmail,
+            products: leadReqs, message: 'Collected via AI Chatbot', status: 'new'
           }).then(r => {
             if (r.error) console.error('Chatbot Supabase save error:', r.error.message);
             else console.log('Chatbot lead saved to Supabase');
           });
         }
 
-        // 3. Send WhatsApp notification via CallMeBot
-        if (typeof saiDB !== 'undefined') {
-          saiDB.from('site_settings').select('*').eq('key', 'whatsapp').single().then(res => {
-            if (res.data && res.data.value && res.data.value.phone && res.data.value.apikey) {
-              const waPhone = res.data.value.phone.replace(/[^0-9]/g, '');
-              const waApi = res.data.value.apikey;
-              const waMsg = encodeURIComponent(`*🤖 AI Chatbot Lead!*\n\n*👤 Name:* ${leadName}\n*📧 Email:* ${leadEmail}\n*📦 Requirements:* ${leadReqs}\n\n_Reply within 24 hours_`);
-              const waUrl = `https://api.callmebot.com/whatsapp.php?phone=${waPhone}&text=${waMsg}&apikey=${waApi}`;
-              fetch(waUrl, { mode: 'no-cors' }).catch(err => console.error('Chatbot WhatsApp error:', err));
-            }
-          }).catch(err => console.error('WhatsApp settings fetch error:', err));
-        }
+        // 3. Send WhatsApp notification
+        sendWhatsAppNotification(leadName, leadEmail, '', leadReqs, 'AI Chatbot Lead');
       }
     }
 
