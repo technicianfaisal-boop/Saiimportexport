@@ -9,6 +9,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=17">
+    <link rel="icon" type="image/png" href="images/sai_logo_icon.webp">
+    <link rel="apple-touch-icon" href="images/sai_logo_icon_192.png">
+    <link rel="manifest" href="admin-manifest.json">
+    <meta name="theme-color" content="#2d5a3c">
+    <meta name="mobile-web-app-capable" content="yes">
     <style>
         * { box-sizing: border-box; }
         body { background: #f4f6f8; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
@@ -475,7 +480,7 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
+            navigator.serviceWorker.register('/admin-sw.js');
         }
     </script>
 </body>
