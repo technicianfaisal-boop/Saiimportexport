@@ -396,6 +396,13 @@ www.saiimportexportagro.com">
         </div>
     </div>
 
+    <!-- Inline catalog modal failsafe -->
+    <script>
+    function openCatalogModal(){var m=document.getElementById('catalog-modal');if(m){m.style.display='flex';document.body.style.overflow='hidden';}}
+    function closeCatalogModal(){var m=document.getElementById('catalog-modal');if(m){m.style.display='none';document.body.style.overflow='auto';}var msg=document.getElementById('cat-msg');if(msg)msg.style.display='none';var f=document.getElementById('catalog-form');if(f){f.reset();var b=f.querySelector('button');if(b)b.disabled=false;}}
+    document.addEventListener('DOMContentLoaded',function(){var cf=document.getElementById('catalog-form');if(cf)cf.addEventListener('submit',function(e){e.preventDefault();var n=document.getElementById('cat-name').value.trim();var em=document.getElementById('cat-email').value.trim();if(!n||!em){alert('Please fill Name & Email');return;}var btn=cf.querySelector('button[type="submit"]');if(btn)btn.disabled=true;var msg=document.getElementById('cat-msg');if(msg)msg.style.display='block';try{if(typeof saiDB!=='undefined')saiDB.from('enquiries').insert({name:n,email:em,message:'Catalog Download',status:'new'}).then(function(){});}catch(e){}try{if(typeof sendTelegramNotification!=='undefined')sendTelegramNotification(n,em,'','Catalog Download','Brochure requested');}catch(e){}var a=document.createElement('a');a.href='/docs/SAI_Import_Export_Catalog.pdf';a.download='SAI_Import_Export_Catalog.pdf';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){try{document.body.removeChild(a);}catch(e){}closeCatalogModal();},2000);});});
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js?v=6"></script>
     <script src="js/product-data.js?v=6"></script>
