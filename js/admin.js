@@ -568,5 +568,132 @@ async function generatePDF() {
     setTimeout(function() { w.print(); }, 500);
 }
 
+// ==================== LIVE ADMIN NOTIFICATIONS ====================
+
+var notifChannel = null;
+var unreadCount = 0;
+
+function requestNotifPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+}
+
+function playNotifSound() {
+    try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+    } catch(e) {}
+}
+
+function showAdminToast(enquiry) {
+    var existing = document.getElementById('admin-live-toast');
+    if (existing) existing.remove();
+
+    var name = enquiry.name || 'New Buyer';
+    var product = (enquiry.products && enquiry.products.length) ? enquiry.products.join(', ') : 'General Inquiry';
+    var country = enquiry.country || '';
+
+    var toast = document.createElement('div');
+    toast.id = 'admin-live-toast';
+    toast.innerHTML = '\
+        <div style="display:flex;align-items:flex-start;gap:12px;">\
+            <div style="font-size:1.8rem;line-height:1">📩</div>\
+            <div>\
+                <div style="font-weight:700;color:#2d5a3c;font-size:0.95rem;">New Enquiry!</div>\
+                <div style="font-size:0.85rem;color:#333;margin-top:2px;"><strong>' + name + '</strong>' + (country ? ' &bull; ' + country : '') + '</div>\
+                <div style="font-size:0.8rem;color:#666;margin-top:2px;">🌾 ' + product + '</div>\
+            </div>\
+            <button onclick="this.parentElement.parentElement.remove()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.1rem;color:#999;padding:0;">✕</button>\
+        </div>';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#fff;border:1px solid #e0e0e0;border-left:4px solid #2d5a3c;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:99999;min-width:280px;max-width:340px;animation:toastSlideIn 0.3s ease;';
+
+    if (!document.getElementById('admin-toast-style')) {
+        var style = document.createElement('style');
+        style.id = 'admin-toast-style';
+        style.textContent = '@keyframes toastSlideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}';
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 8000);
+}
+
+function updateNotifBadge() {
+    unreadCount++;
+    var btn = document.getElementById('nav-enquiries');
+    if (!btn) return;
+    var badge = btn.querySelector('.notif-badge');
+    if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'notif-badge';
+        badge.style.cssText = 'background:#dc3545;color:#fff;font-size:0.65rem;font-weight:700;border-radius:50%;padding:1px 5px;margin-left:6px;vertical-align:middle;';
+        btn.appendChild(badge);
+    }
+    badge.textContent = unreadCount;
+}
+
+function clearNotifBadge() {
+    unreadCount = 0;
+    var badge = document.querySelector('.notif-badge');
+    if (badge) badge.remove();
+}
+
+function startLiveNotifications() {
+    if (notifChannel) return;
+    requestNotifPermission();
+
+    notifChannel = saiDB
+        .channel('admin-enquiries-live')
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'enquiries'
+        }, function(payload) {
+            var enquiry = payload.new;
+            playNotifSound();
+            showAdminToast(enquiry);
+            updateNotifBadge();
+            loadEnquiries();
+
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('📩 New Enquiry — SAI Admin', {
+                    body: (enquiry.name || 'Someone') + ' enquired about ' + (enquiry.products ? enquiry.products[0] : 'your products'),
+                    icon: '/images/sai_logo_icon.webp',
+                    tag: 'sai-enquiry'
+                });
+            }
+        })
+        .subscribe();
+}
+
+function stopLiveNotifications() {
+    if (notifChannel) {
+        saiDB.removeChannel(notifChannel);
+        notifChannel = null;
+    }
+}
+
+// Clear badge when user clicks Enquiries tab
+var origSwitchTab = switchTab;
+switchTab = function(name) {
+    origSwitchTab(name);
+    if (name === 'enquiries') clearNotifBadge();
+};
+
 // ==================== BOOT ====================
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', function() {
+    init().then(function() {
+        startLiveNotifications();
+    }).catch(function() { init(); });
+});
+
