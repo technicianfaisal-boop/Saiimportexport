@@ -1150,19 +1150,19 @@ if (catalogForm) {
     // 2. Send Telegram Alert
     sendTelegramNotification(name, email, '', 'Full Catalog Download', 'User downloaded the brochure.');
 
-    // 3. Trigger PDF Download (Creating a dummy PDF for now)
+    // 3. Trigger Real PDF Download Synchronously (bypasses popup blockers)
+    const link = document.createElement('a');
+    link.href = 'docs/SAI_Import_Export_Catalog.pdf';
+    link.download = 'SAI_Import_Export_Catalog.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Close modal after 2 seconds and re-enable button
     setTimeout(() => {
-      // Smallest valid 1-page PDF base64 string
-      const dummyPdfData = "JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSCgkgID4+CiAgPj4KICAvQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCgo0IDAgb2JqCjw8CiAgL1R5cGUgL0ZvbnQKICAvU3VidHlwZSAvVHlwZTExCiAgL0Jhc2VGb250IC9UaW1lcy1Sb21hbgo+PgplbmRvYmoKCjUgMCBvYmoKPDwgL0xlbmd0aCA0NCA+PgpzdHJlYW0KQlQKL0YxIDE4IFRmCjAgMCAwIHJnCjUwIDEwMCBUZAooU0FJIEltcG9ydCBFeHBvcnQpIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxMCAwMDAwMCBuIAowMDAwMDAwMDYwIDAwMDAwIG4gCjAwMDAwMDAxNDggMDAwMDAgbiAKMDAwMDAwMDI1OCAwMDAwMCBuIAowMDAwMDAwMzUyIDAwMDAwIG4gCnRyYWlsZXIKPDwKICAvU2l6ZSA2CiAgL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjQ0NgolJUVPRgo=";
-      const link = document.createElement('a');
-      link.href = 'data:application/pdf;base64,' + dummyPdfData;
-      link.download = 'SAI_Import_Export_Catalog.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      setTimeout(() => closeCatalogModal(), 2000);
-    }, 1500);
+      closeCatalogModal();
+      document.querySelector('#catalog-form button').disabled = false;
+    }, 2000);
   });
 }
 
