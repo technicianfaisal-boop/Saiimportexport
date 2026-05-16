@@ -1,11 +1,11 @@
-const CACHE_NAME = 'sai-admin-v3';
+const CACHE_NAME = 'sai-admin-v4';
 const ASSETS_TO_CACHE = [
   '/admin/',
   '/css/styles.css',
   '/js/admin.js',
   '/js/supabase-client.js',
-  '/images/sai_logo_icon.webp',
-  '/images/sai_logo_icon_192.png'
+  '/images/admin_icon_192.png',
+  '/images/admin_icon_512.png'
 ];
 
 self.addEventListener('install', (event) => {
