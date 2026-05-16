@@ -1122,6 +1122,8 @@ function openCatalogModal() {
   var modal = document.getElementById('catalog-modal');
   if (modal) {
     modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
     document.body.style.overflow = 'hidden';
   }
 }
@@ -1130,6 +1132,8 @@ function closeCatalogModal() {
   var modal = document.getElementById('catalog-modal');
   if (modal) {
     modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.pointerEvents = 'none';
     document.body.style.overflow = 'auto';
     var msg = document.getElementById('cat-msg');
     if (msg) msg.style.display = 'none';
