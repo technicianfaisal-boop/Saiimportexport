@@ -1119,7 +1119,7 @@ langSearch.addEventListener('keydown', (e) => {
 
 // ==================== CATALOG DOWNLOAD MODAL ====================
 function openCatalogModal() {
-  const modal = document.getElementById('catalog-modal');
+  var modal = document.getElementById('catalog-modal');
   if (modal) {
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -1127,53 +1127,68 @@ function openCatalogModal() {
 }
 
 function closeCatalogModal() {
-  const modal = document.getElementById('catalog-modal');
+  var modal = document.getElementById('catalog-modal');
   if (modal) {
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
-    document.getElementById('cat-msg').style.display = 'none';
-    document.getElementById('catalog-form').reset();
+    var msg = document.getElementById('cat-msg');
+    if (msg) msg.style.display = 'none';
+    var form = document.getElementById('catalog-form');
+    if (form) form.reset();
+    var btn = document.querySelector('#catalog-form button[type="submit"]');
+    if (btn) btn.disabled = false;
   }
 }
 
-const catalogForm = document.getElementById('catalog-form');
-if (catalogForm) {
-  catalogForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('cat-name').value.trim();
-    const email = document.getElementById('cat-email').value.trim();
-    const phone = document.getElementById('cat-phone').value.trim();
-    
-    document.querySelector('#catalog-form button').disabled = true;
-    document.getElementById('cat-msg').style.display = 'block';
+// Attach form handler after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  var catalogForm = document.getElementById('catalog-form');
+  if (catalogForm) {
+    catalogForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      var nameEl = document.getElementById('cat-name');
+      var emailEl = document.getElementById('cat-email');
+      var phoneEl = document.getElementById('cat-phone');
+      
+      var name = nameEl ? nameEl.value.trim() : '';
+      var email = emailEl ? emailEl.value.trim() : '';
+      var phone = phoneEl ? phoneEl.value.trim() : '';
+      
+      if (!name || !email) { alert('Please fill in Name and Email'); return; }
+      
+      var submitBtn = catalogForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+      var msgEl = document.getElementById('cat-msg');
+      if (msgEl) msgEl.style.display = 'block';
 
-    // 1. Save Lead to Supabase
-    if (typeof saiDB !== 'undefined') {
-      const lead = { name, email, phone: phone || null, message: 'Requested Brochure/Catalog Download', status: 'new', source: '📥 Catalog Download' };
-      saiDB.from('enquiries').insert(lead).then(r => {
-        if (r.error && r.error.message && r.error.message.indexOf('source') !== -1) {
-          delete lead.source;
-          saiDB.from('enquiries').insert(lead);
+      // 1. Save Lead to Supabase (non-blocking, with error handling)
+      try {
+        if (typeof saiDB !== 'undefined') {
+          saiDB.from('enquiries').insert({ name: name, email: email, phone: phone || null, message: 'Requested Brochure/Catalog Download', status: 'new' })
+            .then(function() { console.log('Catalog lead saved'); })
+            .catch(function(err) { console.error('Catalog lead error:', err); });
         }
-      });
-    }
+      } catch(e) { console.error('Supabase error:', e); }
 
-    // 2. Send Telegram Alert
-    sendTelegramNotification(name, email, '', 'Full Catalog Download', 'User downloaded the brochure.');
+      // 2. Send Telegram Alert (non-blocking)
+      try {
+        sendTelegramNotification(name, email, '', 'Full Catalog Download', 'User downloaded the brochure.');
+      } catch(e) { console.error('Telegram error:', e); }
 
-    // 3. Trigger Real PDF Download Synchronously (bypasses popup blockers)
-    const link = document.createElement('a');
-    link.href = 'docs/SAI_Import_Export_Catalog.pdf';
-    link.download = 'SAI_Import_Export_Catalog.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Close modal after 2 seconds and re-enable button
-    setTimeout(() => {
-      closeCatalogModal();
-      document.querySelector('#catalog-form button').disabled = false;
-    }, 2000);
-  });
-}
+      // 3. Download PDF
+      var link = document.createElement('a');
+      link.href = 'docs/SAI_Import_Export_Catalog.pdf';
+      link.download = 'SAI_Import_Export_Catalog.pdf';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(function() {
+        document.body.removeChild(link);
+        closeCatalogModal();
+      }, 2000);
+    });
+  }
+});
 
