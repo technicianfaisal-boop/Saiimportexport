@@ -48,8 +48,8 @@ export default async function handler(req, res) {
     // 3. Build the Gemini prompt — ask for real-time grounded data
     const systemPrompt = `You are a senior rice export market analyst and freight specialist at a top Indian commodity trading firm. 
 Today's date is ${today}. Current USD/INR rate: ₹${usdInrRate.toFixed(2)}.
-You have access to Google Search — use it to find the most current data available.
-Always respond with ONLY a valid JSON object, no markdown, no explanation.`;
+Use your knowledge of recent global market trends to provide an estimate.
+Always respond with ONLY a valid JSON object matching the requested schema exactly.`;
 
     const userPrompt = `Search for current market data and analyze this rice export shipment:
 
@@ -89,16 +89,16 @@ Return ONLY this JSON structure (fill in real numbers based on current market re
   "disclaimer": "AI estimates grounded in current web data. Contact SAI Import Export Agro for exact binding quote."
 }`;
 
-    // 4. Call Gemini with Google Search Grounding enabled
+    // 4. Call AI with JSON response type enabled
     const MODELS = [
-      { id: 'gemini-2.5-flash', grounding: true },
-      { id: 'gemini-2.0-flash', grounding: true },
-      { id: 'gemini-1.5-flash', grounding: false },  // fallback without grounding
+      'gemini-2.5-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-1.5-flash'
     ];
 
     let lastError = null;
 
-    for (const { id: model, grounding } of MODELS) {
+    for (const model of MODELS) {
       try {
         const body = {
           contents: [
@@ -108,13 +108,9 @@ Return ONLY this JSON structure (fill in real numbers based on current market re
             temperature: 0.2,
             maxOutputTokens: 2000,
             topP: 0.9,
+            responseMimeType: "application/json"
           }
         };
-
-        // Add Google Search tool if supported
-        if (grounding) {
-          body.tools = [{ googleSearch: {} }];
-        }
 
         const geminiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -152,14 +148,11 @@ Return ONLY this JSON structure (fill in real numbers based on current market re
                 };
               }
 
-              // Include grounding metadata if available
-              const groundingMeta = data.candidates[0].groundingMetadata || null;
-
               return res.status(200).json({
                 success: true,
                 estimate,
                 model,
-                grounded: grounding && !!groundingMeta,
+                grounded: false,
                 exchange_rate: usdInrRate,
                 quantity: totalMt
               });
