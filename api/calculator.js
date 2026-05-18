@@ -35,13 +35,20 @@ export default async function handler(req, res) {
       }
     } catch (_) {}
 
-    const { origin, destination, product, quantity, packaging } = req.body;
-    if (!origin || !destination || !product || !quantity) {
-      return res.status(400).json({ error: 'Missing required fields: origin, destination, product, quantity' });
+    const { origin, destination, products } = req.body;
+    if (!origin || !destination || !products || !Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ error: 'Missing required fields: origin, destination, products array' });
     }
 
     const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const totalMt = parseFloat(quantity);
+    let totalMt = 0;
+    let productsListText = '';
+    
+    products.forEach((p, i) => {
+      totalMt += parseFloat(p.quantity || 0);
+      productsListText += `${i + 1}. Product: ${p.product} | Quantity: ${p.quantity} MT | Packaging: ${p.packaging}\n`;
+    });
+
     const containers20 = Math.ceil(totalMt / 25);
     const containers40 = Math.ceil(totalMt / 27);
 
@@ -51,39 +58,43 @@ Today's date is ${today}. Current USD/INR rate: ₹${usdInrRate.toFixed(2)}.
 Use your knowledge of recent global market trends to provide an estimate.
 Always respond with ONLY a valid JSON object matching the requested schema exactly.`;
 
-    const userPrompt = `Search for current market data and analyze this rice export shipment:
+    const userPrompt = `Search for current market data and analyze this multi-product rice export shipment:
 
 SHIPMENT DETAILS:
-- Product: ${product}
-- Quantity: ${totalMt} Metric Tonnes (MT)
+- Total Quantity: ${totalMt} Metric Tonnes (MT)
 - Origin Port: ${origin}, India  
 - Destination Port: ${destination}
-- Packaging: ${packaging || 'PP Bags 25/50 kg'}
 - Container estimate: ${containers20}x 20FCL or ${containers40}x 40HC
 
+PRODUCTS INCLUDED:
+${productsListText}
+
 SEARCH FOR AND ANALYZE:
-1. Current FOB export price for ${product} from Indian ports (APEDA data, NCDEX, trade publications)
-2. Current sea freight rates from ${origin} to ${destination} (Freightos, Drewry, SCFI index)
+1. Current FOB export price for each specific product from Indian ports (APEDA data, NCDEX, trade publications)
+2. Current overall sea freight rates from ${origin} to ${destination} for the total quantity (Freightos, Drewry, SCFI index)
 3. Recent Indian rice export policy (government MSP, export restrictions if any)
-4. Current market demand scenario for ${product} in destination region
-5. Estimated port handling + documentation costs
+4. Estimated total port handling + documentation costs for the entire shipment
 
 Return ONLY this JSON structure (fill in real numbers based on current market research):
 {
-  "fob_price": { "min": 0, "max": 0, "currency": "USD", "unit": "per MT" },
-  "freight_cost": { "min": 0, "max": 0, "currency": "USD", "unit": "per MT" },
-  "handling_docs": { "min": 0, "max": 0, "currency": "USD", "unit": "per MT" },
-  "cif_per_mt": { "min": 0, "max": 0, "currency": "USD", "unit": "per MT" },
+  "products_breakdown": [
+    {
+      "product_name": "Name of product",
+      "quantity_mt": 0,
+      "fob_price": { "min": 0, "max": 0, "currency": "USD", "unit": "per MT" }
+    }
+  ],
+  "freight_cost_total": { "min": 0, "max": 0, "currency": "USD" },
+  "handling_docs_total": { "min": 0, "max": 0, "currency": "USD" },
   "cif_total": { "min": 0, "max": 0, "currency": "USD" },
   "inr_total": { "min": 0, "max": 0, "currency": "INR" },
   "containers": "Nxx 20FCL or Nxx 40HC",
   "lead_time": { "min": 0, "max": 0, "unit": "days" },
   "market_scenario": "bullish|neutral|bearish",
-  "market_summary": "2-3 sentence current market overview with specific data points",
+  "market_summary": "2-3 sentence current market overview with specific data points for these products",
   "risk_factors": ["risk1", "risk2", "risk3"],
-  "payment_recommendation": "Recommended payment terms for this buyer-seller route",
-  "port_note": "Specific note about ${origin} to ${destination} route reliability and frequency",
-  "best_container": "Recommendation between 20FCL or 40HC for this quantity",
+  "payment_recommendation": "Recommended payment terms for this route",
+  "port_note": "Specific note about ${origin} to ${destination} route",
   "exchange_rate_used": ${usdInrRate.toFixed(2)},
   "data_sources": ["source1", "source2"],
   "disclaimer": "AI estimates grounded in current web data. Contact SAI Import Export Agro for exact binding quote."
@@ -134,10 +145,25 @@ Return ONLY this JSON structure (fill in real numbers based on current market re
               const estimate = JSON.parse(jsonMatch[0]);
 
               // Post-process: calculate totals if model didn't fill them correctly
-              if (!estimate.cif_total?.min && estimate.cif_per_mt?.min) {
+              if (!estimate.cif_total?.min) {
+                let fobTotalMin = 0;
+                let fobTotalMax = 0;
+                
+                if (estimate.products_breakdown) {
+                  estimate.products_breakdown.forEach(p => {
+                    if (p.fob_price?.min) fobTotalMin += (p.fob_price.min * p.quantity_mt);
+                    if (p.fob_price?.max) fobTotalMax += (p.fob_price.max * p.quantity_mt);
+                  });
+                }
+                
+                const frMin = estimate.freight_cost_total?.min || 0;
+                const frMax = estimate.freight_cost_total?.max || 0;
+                const hdMin = estimate.handling_docs_total?.min || 0;
+                const hdMax = estimate.handling_docs_total?.max || 0;
+
                 estimate.cif_total = {
-                  min: Math.round(estimate.cif_per_mt.min * totalMt),
-                  max: Math.round(estimate.cif_per_mt.max * totalMt),
+                  min: Math.round(fobTotalMin + frMin + hdMin),
+                  max: Math.round(fobTotalMax + frMax + hdMax),
                   currency: 'USD'
                 };
               }

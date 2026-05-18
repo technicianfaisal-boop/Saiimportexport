@@ -109,24 +109,12 @@
         <div class="calc-box">
             <h2>Shipment Details</h2>
             <form id="calc-form">
-                <div class="form-group">
-                    <label>Product</label>
-                    <select id="calc-product" class="form-control" title="Select Product" required>
-                        <option value="">Loading products...</option>
-                    </select>
+                <div id="product-lines-container">
+                    <!-- Dynamic product rows injected via JS -->
                 </div>
-                <div class="res-grid mb-0">
-                    <div class="form-group">
-                        <label>Quantity (MT)</label>
-                        <input type="number" id="calc-qty" class="form-control" min="25" value="50" title="Quantity in MT" placeholder="Quantity in MT" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Packaging</label>
-                        <select id="calc-pack" class="form-control" title="Select Packaging" required>
-                            <option value="">Select Product First</option>
-                        </select>
-                    </div>
-                </div>
+                <button type="button" id="add-product-btn" class="btn-outline-dark" style="margin-bottom:1.5rem; padding: 6px 15px; font-size: 0.9rem; border-radius:20px; width:auto; border:1px solid #ccc;">+ Add Another Product</button>
+                
+                <h3 style="font-size: 1.1rem; color: var(--green-dark); margin: 1rem 0; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">Shipping Route</h3>
                 <div class="form-group mt-1rem">
                     <label>Origin Port (India)</label>
                     <select id="calc-origin" class="form-control" title="Select Origin Port" required>
@@ -187,19 +175,26 @@
                 <div class="grounding-badge" id="res-badge">✨ Grounded with Google Search</div>
                 
                 <div class="res-card total">
-                    <div class="res-label">Estimated Total CIF (<span id="res-qty"></span> MT)</div>
+                    <div class="res-label">Estimated Total CIF (<span id="res-qty"></span> MT Total)</div>
                     <div class="res-val" id="res-total-usd">$0</div>
                     <div class="inr-val-text" id="res-total-inr">₹0</div>
                 </div>
 
+                <div class="res-section">
+                    <h4>Product Breakdown (Estimated FOB)</h4>
+                    <div id="res-products-breakdown" style="background:#fff; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:1.5rem;">
+                        <!-- Breakdown injected via JS -->
+                    </div>
+                </div>
+
                 <div class="res-grid">
                     <div class="res-mini">
-                        <div class="res-label">FOB Price</div>
-                        <div class="res-mini-val" id="res-fob"></div>
+                        <div class="res-label">Total Freight</div>
+                        <div class="res-mini-val" id="res-freight"></div>
                     </div>
                     <div class="res-mini">
-                        <div class="res-label">Freight / MT</div>
-                        <div class="res-mini-val" id="res-freight"></div>
+                        <div class="res-label">Handling & Docs</div>
+                        <div class="res-mini-val" id="res-handling"></div>
                     </div>
                     <div class="res-mini">
                         <div class="res-label">Lead Time</div>
@@ -269,28 +264,55 @@
         ];
 
         // Populate Products & Variants Dynamically
-        async function initCalculator() {
-            if (typeof loadProductsFromDB !== 'undefined') {
-                await loadProductsFromDB();
-            } else {
-                PRODUCT_DETAILS = PRODUCT_DETAILS_STATIC;
-            }
+        let productRowCount = 0;
 
-            const prodSelect = document.getElementById('calc-product');
-            const packSelect = document.getElementById('calc-pack');
+        function addProductRow() {
+            productRowCount++;
+            const rowId = `prod-row-${productRowCount}`;
+            const isFirst = productRowCount === 1;
             
-            prodSelect.innerHTML = '<option value="">-- Select Product --</option>';
+            const html = `
+                <div class="product-row" id="${rowId}" style="border:1px solid #eee; padding:15px; border-radius:8px; margin-bottom:1rem; position:relative; background:#f9fcfb;">
+                    ${!isFirst ? `<button type="button" onclick="document.getElementById('${rowId}').remove()" style="position:absolute; top:10px; right:10px; background:none; border:none; color:#dc3545; cursor:pointer; font-size:1.5rem; line-height:1;">&times;</button>` : ''}
+                    <div class="form-group">
+                        <label>Product ${productRowCount}</label>
+                        <select class="form-control calc-product" title="Select Product" required>
+                            <option value="">-- Select Product --</option>
+                        </select>
+                    </div>
+                    <div class="res-grid mb-0">
+                        <div class="form-group">
+                            <label>Quantity (MT)</label>
+                            <input type="number" class="form-control calc-qty" min="1" value="25" title="Quantity in MT" placeholder="Quantity in MT" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Packaging</label>
+                            <select class="form-control calc-pack" title="Select Packaging" required>
+                                <option value="">Select Product First</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
             
+            const container = document.getElementById('product-lines-container');
+            container.insertAdjacentHTML('beforeend', html);
+            
+            const newRow = document.getElementById(rowId);
+            const prodSelect = newRow.querySelector('.calc-product');
+            const packSelect = newRow.querySelector('.calc-pack');
+            
+            // Populate Product Dropdown
             for (const key in PRODUCT_DETAILS) {
                 const p = PRODUCT_DETAILS[key];
                 const opt = document.createElement('option');
-                // The AI needs the product name to do its search properly
                 opt.value = p.name;
                 opt.textContent = p.name;
-                opt.dataset.key = key; // Keep reference to key to fetch variants later
+                opt.dataset.key = key;
                 prodSelect.appendChild(opt);
             }
-
+            
+            // Listen for product changes
             prodSelect.addEventListener('change', () => {
                 const selectedOpt = prodSelect.options[prodSelect.selectedIndex];
                 const key = selectedOpt.dataset.key;
@@ -317,17 +339,49 @@
                 }
             });
         }
+
+        async function initCalculator() {
+            if (typeof loadProductsFromDB !== 'undefined') {
+                await loadProductsFromDB();
+            } else {
+                PRODUCT_DETAILS = PRODUCT_DETAILS_STATIC;
+            }
+            
+            // Add first initial row
+            addProductRow();
+            
+            document.getElementById('add-product-btn').addEventListener('click', addProductRow);
+        }
         
         document.addEventListener('DOMContentLoaded', initCalculator);
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Collect all products
+            const productRows = document.querySelectorAll('.product-row');
+            const products = [];
+            let totalMt = 0;
+            
+            productRows.forEach(row => {
+                const prod = row.querySelector('.calc-product').value;
+                const qty = parseFloat(row.querySelector('.calc-qty').value || 0);
+                const pack = row.querySelector('.calc-pack').value;
+                if (prod && qty > 0) {
+                    products.push({ product: prod, quantity: qty, packaging: pack });
+                    totalMt += qty;
+                }
+            });
+
+            if (products.length === 0) {
+                alert("Please add at least one valid product.");
+                return;
+            }
+
             const data = {
-                product: document.getElementById('calc-product').value,
                 origin: document.getElementById('calc-origin').value,
                 destination: document.getElementById('calc-dest').value,
-                quantity: document.getElementById('calc-qty').value,
-                packaging: document.getElementById('calc-pack').value
+                products: products
             };
 
             initial.style.display = 'none';
@@ -369,8 +423,8 @@
 
                 const est = json.estimate;
                 
-                // Populate UI
-                document.getElementById('res-qty').textContent = json.quantity;
+                // Populate Global UI
+                document.getElementById('res-qty').textContent = totalMt;
                 document.getElementById('res-total-usd').textContent = `$${est.cif_total.min.toLocaleString()} - $${est.cif_total.max.toLocaleString()}`;
                 if (est.inr_total) {
                     document.getElementById('res-total-inr').textContent = `approx ₹${est.inr_total.min.toLocaleString()} - ₹${est.inr_total.max.toLocaleString()}`;
@@ -378,8 +432,24 @@
                     document.getElementById('res-total-inr').textContent = '';
                 }
 
-                document.getElementById('res-fob').textContent = `$${est.fob_price.min}-$${est.fob_price.max}`;
-                document.getElementById('res-freight').textContent = `$${est.freight_cost.min}-$${est.freight_cost.max}`;
+                // Populate Product Breakdown
+                const breakdownContainer = document.getElementById('res-products-breakdown');
+                breakdownContainer.innerHTML = '';
+                if (est.products_breakdown && est.products_breakdown.length > 0) {
+                    est.products_breakdown.forEach(item => {
+                        breakdownContainer.innerHTML += `
+                            <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f0f0f0;">
+                                <div><strong>${item.product_name}</strong> <span style="color:#666; font-size:0.85rem;">(${item.quantity_mt} MT)</span></div>
+                                <div style="color:var(--green-dark); font-weight:600;">$${item.fob_price.min} - $${item.fob_price.max} / MT</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    breakdownContainer.innerHTML = '<p style="color:#666; font-size:0.9rem;">Breakdown unavailable.</p>';
+                }
+
+                document.getElementById('res-freight').textContent = `$${est.freight_cost_total.min.toLocaleString()} - $${est.freight_cost_total.max.toLocaleString()}`;
+                document.getElementById('res-handling').textContent = `$${est.handling_docs_total.min.toLocaleString()} - $${est.handling_docs_total.max.toLocaleString()}`;
                 document.getElementById('res-lead').textContent = `${est.lead_time.min}-${est.lead_time.max} days`;
                 document.getElementById('res-containers').textContent = est.containers;
                 
