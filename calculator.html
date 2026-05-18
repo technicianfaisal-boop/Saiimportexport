@@ -112,16 +112,22 @@
                 <div class="form-group">
                     <label>Product</label>
                     <select id="calc-product" class="form-control" title="Select Product" required>
-                        <option value="1121 Basmati Rice (White Sella)">1121 Basmati (White Sella)</option>
-                        <option value="1121 Basmati Rice (Golden Sella)">1121 Basmati (Golden Sella)</option>
-                        <option value="1509 Basmati Rice">1509 Basmati</option>
-                        <option value="Sona Masoori Rice">Sona Masoori</option>
-                        <option value="IR64 Parboiled Rice (5% Broken)">IR64 Parboiled</option>
-                        <option value="Swarna Raw Rice">Swarna Raw</option>
-                        <option value="100% Broken Rice">100% Broken White Rice</option>
+                        <option value="">Loading products...</option>
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="res-grid mb-0">
+                    <div class="form-group">
+                        <label>Quantity (MT)</label>
+                        <input type="number" id="calc-qty" class="form-control" min="25" value="50" title="Quantity in MT" placeholder="Quantity in MT" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Packaging</label>
+                        <select id="calc-pack" class="form-control" title="Select Packaging" required>
+                            <option value="">Select Product First</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mt-1rem">
                     <label>Origin Port (India)</label>
                     <select id="calc-origin" class="form-control" title="Select Origin Port" required>
                         <option value="Nhava Sheva (Mumbai)">Nhava Sheva (Mumbai)</option>
@@ -157,21 +163,6 @@
                             <option value="Dakar, Senegal">Dakar, Senegal</option>
                         </optgroup>
                     </select>
-                </div>
-                <div class="res-grid mb-0">
-                    <div class="form-group">
-                        <label>Quantity (MT)</label>
-                        <input type="number" id="calc-qty" class="form-control" min="25" value="50" title="Quantity in MT" placeholder="Quantity in MT" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Packaging</label>
-                        <select id="calc-pack" class="form-control" title="Select Packaging">
-                            <option value="PP Bags 25kg">PP Bags 25kg</option>
-                            <option value="PP Bags 50kg">PP Bags 50kg</option>
-                            <option value="Non-Woven 10kg">Non-Woven 10kg</option>
-                            <option value="Jute Bags 50kg">Jute Bags</option>
-                        </select>
-                    </div>
                 </div>
                 <button type="submit" class="btn-cta btn-full" id="calc-btn">Get Live Estimate</button>
             </form>
@@ -256,7 +247,10 @@
         <div class="footer-bottom"><p>&copy; 2026 SAI Import Export Agro. All rights reserved.</p></div>
     </footer>
 
-    <script src="js/script.js?v=20"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js?v=7"></script>
+    <script src="js/product-data.js?v=7"></script>
+    <script src="js/script.js?v=21"></script>
     <script>
         const form = document.getElementById('calc-form');
         const btn = document.getElementById('calc-btn');
@@ -273,6 +267,58 @@
             "Checking port congestion data...",
             "Compiling final estimate..."
         ];
+
+        // Populate Products & Variants Dynamically
+        async function initCalculator() {
+            if (typeof loadProductsFromDB !== 'undefined') {
+                await loadProductsFromDB();
+            } else {
+                PRODUCT_DETAILS = PRODUCT_DETAILS_STATIC;
+            }
+
+            const prodSelect = document.getElementById('calc-product');
+            const packSelect = document.getElementById('calc-pack');
+            
+            prodSelect.innerHTML = '<option value="">-- Select Product --</option>';
+            
+            for (const key in PRODUCT_DETAILS) {
+                const p = PRODUCT_DETAILS[key];
+                const opt = document.createElement('option');
+                // The AI needs the product name to do its search properly
+                opt.value = p.name;
+                opt.textContent = p.name;
+                opt.dataset.key = key; // Keep reference to key to fetch variants later
+                prodSelect.appendChild(opt);
+            }
+
+            prodSelect.addEventListener('change', () => {
+                const selectedOpt = prodSelect.options[prodSelect.selectedIndex];
+                const key = selectedOpt.dataset.key;
+                
+                packSelect.innerHTML = '';
+                if (!key || !PRODUCT_DETAILS[key]) {
+                    packSelect.innerHTML = '<option value="">Select Product First</option>';
+                    return;
+                }
+                
+                const product = PRODUCT_DETAILS[key];
+                if (product.packaging && product.packaging.length > 0) {
+                    product.packaging.forEach(pack => {
+                        const packOpt = document.createElement('option');
+                        packOpt.value = pack.type + ' (' + pack.sizes + ')';
+                        packOpt.textContent = pack.type + ' - ' + pack.sizes;
+                        packSelect.appendChild(packOpt);
+                    });
+                } else {
+                    const fallback = document.createElement('option');
+                    fallback.value = 'Standard Export Packaging';
+                    fallback.textContent = 'Standard Export Packaging';
+                    packSelect.appendChild(fallback);
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', initCalculator);
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
