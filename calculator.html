@@ -311,7 +311,14 @@
                 btn.style.opacity = '1';
 
                 if (!res.ok || !json.estimate) {
-                    throw new Error(json.error || 'Failed to generate estimate');
+                    console.error('Calculator API Error Details:', json);
+                    let errDetails = '';
+                    if (json.details && json.details.error && json.details.error.message) {
+                        errDetails = ' - ' + json.details.error.message;
+                    } else if (json.details && json.details.parseError) {
+                        errDetails = ' - AI returned invalid format.';
+                    }
+                    throw new Error((json.error || 'Failed to generate estimate') + errDetails);
                 }
 
                 const est = json.estimate;
